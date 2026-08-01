@@ -1,0 +1,22 @@
+export type RootStackParamList = {
+  Welcome: undefined;
+  Login: undefined;
+  Register: undefined;
+  Forgot: undefined;
+  Home: undefined;
+  Subir: undefined;
+  Procesando: undefined;
+  Resultado: { analysisId: string };
+  Comparacion: { analysisId: string };
+  Chat: undefined;
+  Progreso: undefined;
+  Concursos: undefined;
+  Veredicto: { veredictoId: string };
+  Perfil: undefined;
+  EditarPerfil: undefined;
+  NuevoCaballo: { editId?: string } | undefined;
+  AjustesMenu: undefined;
+  AjustesNivel: undefined;
+  AjustesNotif: undefined;
+  AjustesSuscripcion: undefined;
+};

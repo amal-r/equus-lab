@@ -1,0 +1,227 @@
+import React, { useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScreenContainer } from '../../components/ScreenContainer';
+import { BackHeader } from '../../components/BackHeader';
+import { PrimaryButton } from '../../components/PrimaryButton';
+import { useT } from '../../i18n/useT';
+import { useTheme } from '../../theme/useTheme';
+import { useAppStore } from '../../store/useAppStore';
+import { PLAN_DEFS, PlanTier } from '../../types/models';
+import type { RootStackParamList } from '../../navigation/types';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'AjustesSuscripcion'>;
+
+const TIERS: Exclude<PlanTier, 'free'>[] = ['premium', 'pro', 'elite'];
+
+function formatEUR(n: number): string {
+  return `${n.toFixed(2).replace('.', ',')} €`;
+}
+
+export default function AjustesSuscripcionScreen({ navigation }: Props) {
+  const { t } = useT();
+  const { colors, radius } = useTheme();
+  const planTier = useAppStore((s) => s.planTier);
+  const ciclo = useAppStore((s) => s.ciclo);
+  const setCiclo = useAppStore((s) => s.setCiclo);
+  const pickPlanTier = useAppStore((s) => s.pickPlanTier);
+  const subEstado = useAppStore((s) => s.subEstado);
+  const usoMin = useAppStore((s) => s.usoMin);
+  const usoTotal = useAppStore((s) => s.usoTotal);
+  const subscribe = useAppStore((s) => s.subscribe);
+  const cancelSubscription = useAppStore((s) => s.cancelSubscription);
+  const reactivateSubscription = useAppStore((s) => s.reactivateSubscription);
+  const buyExtraPack = useAppStore((s) => s.buyExtraPack);
+  const [confirmCancel, setConfirmCancel] = useState(false);
+
+  const isAnual = ciclo === 'anual';
+  const selDef = planTier !== 'free' ? PLAN_DEFS[planTier] : PLAN_DEFS.premium;
+  const usoPct = usoTotal > 0 ? Math.min(100, Math.round((usoMin / usoTotal) * 100)) : 0;
+  const usoAviso = usoTotal > 0 && usoMin / usoTotal >= 0.8;
+  const usoColor = usoAviso ? colors.warn : colors.accent;
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
+      <ScreenContainer>
+        <BackHeader title={t('suscripcion')} onBack={() => navigation.goBack()} />
+
+        <View style={{ backgroundColor: '#26221d', borderRadius: radius.xxl, padding: 22, marginBottom: 18 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <Text style={{ fontSize: 20 }}>⭐</Text>
+            <Text style={{ fontWeight: '800', fontSize: 18, color: '#faf7f2' }}>{t('equusLabPremium')}</Text>
+          </View>
+
+          {subEstado === 'gratis' && (
+            <Text style={{ fontSize: 12, color: 'rgba(250,247,242,0.6)', marginBottom: 16 }}>{t('planGratuitoDesc')}</Text>
+          )}
+
+          {subEstado !== 'gratis' && (
+            <>
+              <Text style={{ fontSize: 12, color: 'rgba(250,247,242,0.6)', marginBottom: 16 }}>
+                {isAnual ? `${t('anual')} · ${t('ahorro20')}` : `${t('mensual')} · ${selDef.nombre}`}
+              </Text>
+              <View style={{ backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 14, padding: 14, marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 8 }}>
+                  <Text style={{ fontWeight: '800', fontSize: 12, color: '#faf7f2' }}>{t('usoDeEsteMes')}</Text>
+                  <Text style={{ marginLeft: 'auto', fontWeight: '700', fontSize: 12, color: usoColor }}>
+                    {usoMin} / {usoTotal} min
+                  </Text>
+                </View>
+                <View style={{ height: 8, backgroundColor: 'rgba(255,255,255,0.14)', borderRadius: 5, overflow: 'hidden' }}>
+                  <View style={{ width: `${usoPct}%`, height: '100%', backgroundColor: usoColor, borderRadius: 5 }} />
+                </View>
+                <Text style={{ fontSize: 11, color: 'rgba(250,247,242,0.55)', marginTop: 8, lineHeight: 15 }}>
+                  {usoAviso ? t('usoAvisoMsg') : t('usoNormalMsg', { min: usoTotal })}
+                </Text>
+              </View>
+              {usoAviso && (
+                <Pressable onPress={buyExtraPack} style={{ backgroundColor: colors.accent, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginBottom: 16 }}>
+                  <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12.5 }}>{t('comprarPack')}</Text>
+                </Pressable>
+              )}
+            </>
+          )}
+
+          <View style={{ gap: 9 }}>
+            {[t('caracteristicaJuez'), t('caracteristicaComparacion'), t('caracteristicaChat')].map((f) => (
+              <View key={f} style={{ flexDirection: 'row', gap: 9 }}>
+                <Text style={{ color: colors.accent }}>✓</Text>
+                <Text style={{ fontSize: 12.5, color: '#faf7f2', flex: 1 }}>{f}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink, marginBottom: 11 }}>{t('eligeTuPlan')}</Text>
+        <View style={{ flexDirection: 'row', gap: 6, backgroundColor: colors.tint, borderRadius: 14, padding: 4, marginBottom: 14 }}>
+          {(['mensual', 'anual'] as const).map((c) => {
+            const on = ciclo === c;
+            return (
+              <Pressable
+                key={c}
+                onPress={() => setCiclo(c)}
+                style={{
+                  flex: 1,
+                  borderRadius: 11,
+                  paddingVertical: 10,
+                  alignItems: 'center',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  gap: 6,
+                  backgroundColor: on ? colors.surface : 'transparent',
+                }}
+              >
+                <Text style={{ fontSize: 12.5, fontWeight: on ? '800' : '600', color: on ? colors.ink : colors.m55 }}>{t(c)}</Text>
+                {c === 'anual' && (
+                  <View style={{ backgroundColor: colors.accent, borderRadius: 20, paddingVertical: 2, paddingHorizontal: 7 }}>
+                    <Text style={{ color: '#fff', fontWeight: '800', fontSize: 9 }}>−20%</Text>
+                  </View>
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <View style={{ gap: 10, marginBottom: 18 }}>
+          {TIERS.map((id) => {
+            const def = PLAN_DEFS[id];
+            const on = planTier === id;
+            const price = isAnual ? def.precioAnual : def.precioMensual;
+            return (
+              <Pressable
+                key={id}
+                onPress={() => pickPlanTier(id)}
+                style={{
+                  borderRadius: radius.xl,
+                  padding: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 13,
+                  backgroundColor: on ? '#26221d' : colors.surface,
+                  borderWidth: on ? 0 : 1,
+                  borderColor: colors.border,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text style={{ fontWeight: '800', fontSize: 14.5, color: on ? '#faf7f2' : colors.ink }}>{def.nombre}</Text>
+                    {id === 'pro' && (
+                      <View style={{ backgroundColor: colors.accent, borderRadius: 20, paddingVertical: 3, paddingHorizontal: 8 }}>
+                        <Text style={{ color: '#fff', fontWeight: '800', fontSize: 9 }}>POPULAR</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={{ fontSize: 11.5, color: on ? 'rgba(250,247,242,0.6)' : colors.m55, marginTop: 3 }}>
+                    {def.minMes} min/mes · vídeos hasta {def.clipMaxMin} min
+                  </Text>
+                  {isAnual && <Text style={{ fontSize: 10.5, color: on ? '#e79877' : colors.accent, marginTop: 4, fontWeight: '700' }}>{t('ahorro20')}</Text>}
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={{ fontWeight: '800', fontSize: 16, color: on ? '#faf7f2' : colors.ink }}>{formatEUR(price)}</Text>
+                  <Text style={{ fontSize: 10, color: on ? 'rgba(250,247,242,0.6)' : colors.m55 }}>{isAnual ? '/ año' : '/ mes'}</Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {subEstado === 'gratis' && (
+          <>
+            <PrimaryButton
+              label={t('suscribirme', { plan: selDef.nombre, precio: formatEUR(isAnual ? selDef.precioAnual : selDef.precioMensual) })}
+              onPress={subscribe}
+              style={{ marginBottom: 8 }}
+            />
+            <Text style={{ textAlign: 'center', fontSize: 11, color: colors.m50, lineHeight: 16 }}>{t('cobroTiendaNota')}</Text>
+          </>
+        )}
+
+        {subEstado === 'activa' && (
+          <>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
+              <Text style={{ fontWeight: '800', fontSize: 26, color: colors.ink }}>{formatEUR(isAnual ? selDef.precioAnual : selDef.precioMensual)}</Text>
+              <Text style={{ fontSize: 12, color: colors.m50 }}>{isAnual ? '/ año' : '/ mes'}</Text>
+            </View>
+            <PrimaryButton
+              label={isAnual ? t('volverMensual') : t('cambiarAnual')}
+              onPress={() => setCiclo(isAnual ? 'mensual' : 'anual')}
+              style={{ marginBottom: 10 }}
+            />
+            {confirmCancel ? (
+              <View style={{ backgroundColor: '#f7ece7', borderRadius: 14, padding: 15 }}>
+                <Text style={{ fontSize: 12.5, lineHeight: 18, color: '#26221d', marginBottom: 12 }}>{t('seguroCancelar')}</Text>
+                <View style={{ flexDirection: 'row', gap: 9 }}>
+                  <PrimaryButton label={t('seguirPremium')} onPress={() => setConfirmCancel(false)} variant="outline" style={{ flex: 1 }} />
+                  <Pressable
+                    onPress={() => {
+                      cancelSubscription();
+                      setConfirmCancel(false);
+                    }}
+                    style={{ flex: 1, backgroundColor: colors.danger, borderRadius: 12, paddingVertical: 12, alignItems: 'center' }}
+                  >
+                    <Text style={{ color: '#fff', fontWeight: '700', fontSize: 12.5 }}>{t('siCancelar')}</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <Pressable onPress={() => setConfirmCancel(true)} style={{ paddingVertical: 8, alignItems: 'center' }}>
+                <Text style={{ color: colors.m40, fontWeight: '600', fontSize: 12.5 }}>{t('cancelarSuscripcion')}</Text>
+              </Pressable>
+            )}
+          </>
+        )}
+
+        {subEstado === 'cancelada' && (
+          <>
+            <View style={{ backgroundColor: '#f7ece7', borderRadius: radius.xl, padding: 16, marginBottom: 14, flexDirection: 'row', gap: 12 }}>
+              <Text style={{ fontSize: 20 }}>ℹ️</Text>
+              <Text style={{ fontSize: 12.5, lineHeight: 18, color: '#26221d', flex: 1 }}>{t('suscripcionCancelada')}</Text>
+            </View>
+            <PrimaryButton label={t('reactivarPremium')} onPress={reactivateSubscription} />
+          </>
+        )}
+      </ScreenContainer>
+    </SafeAreaView>
+  );
+}
