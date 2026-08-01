@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+body{margin:0;background:#e6e2da;font-family:'Manrope',system-ui,sans-serif}
+.grayscale,.grayscale image-slot{filter:grayscale(1) contrast(1.02)}
+.eqroot{--bg:#faf7f2;--surface:#fff;--nav:#f1ebe3;--tint:#eef1ea;--ph:#ecdfd3;--chip:#f5e7de;--ink:#26221d;--m30:rgba(0,0,0,.30);--m35:var(--m35);--m40:rgba(0,0,0,.40);--m45:var(--m45);--m50:rgba(0,0,0,.50);--m55:var(--m55);--m60:rgba(0,0,0,.60)}
+.eqroot[data-theme=dark]{--bg:#17130f;--surface:#241f18;--nav:#1e1913;--tint:#25301e;--ph:#3a332b;--chip:#3a2c22;--ink:#f2ede6;--m30:rgba(242,237,230,.35);--m35:rgba(242,237,230,.40);--m40:rgba(242,237,230,.46);--m45:rgba(242,237,230,.52);--m50:rgba(242,237,230,.58);--m55:rgba(242,237,230,.64);--m60:rgba(242,237,230,.70)}
+a{color:#c05f3a}a:hover{color:#a44d2c}
+*{box-sizing:border-box}
+@keyframes eqIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes eqPop{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:none}}
+.eq-scr{animation:eqIn .32s cubic-bezier(.2,.7,.3,1)}
+.eq-msg{animation:eqPop .3s cubic-bezier(.2,.7,.3,1)}
+.striped{background-image:repeating-linear-gradient(135deg,rgba(0,0,0,.06) 0 9px,transparent 9px 18px)}
+.eq-body::-webkit-scrollbar{width:0}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="--accent:{{accent}};min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px 20px">
+  <div style="width:384px;background:#0b0b0c;border-radius:48px;padding:11px;box-shadow:0 40px 80px -30px var(--m55)">
+    <div class="eqroot" data-theme="{{ theme }}" style="position:relative;border-radius:37px;overflow:hidden;height:788px;background:var(--bg);color:var(--ink);display:flex;flex-direction:column">
+      <div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:116px;height:31px;background:#0b0b0c;border-radius:16px;z-index:60"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:15px 28px 6px;font-size:13px;font-weight:700;position:relative;z-index:50;color:{{topColor}}">
+        <span>9:41</span><span style="font-size:11px;letter-spacing:.02em;color:var(--accent)">equus lab</span>
+      </div>
+
+      <!-- ===== WELCOME ===== -->
+      <sc-if value="{{ isWelcome }}" hint-placeholder-val="{{ true }}">
+        <div class="eq-scr" style="flex:1;position:relative;overflow:hidden;color:#faf7f2;background:radial-gradient(120% 80% at 78% 8%, #4a2f22 0%, #2a201a 42%, #171310 100%)">
+          <div style="position:absolute;inset:0;pointer-events:none;opacity:.5;background:radial-gradient(60% 40% at 82% 12%, rgba(192,95,58,.55) 0%, transparent 60%)"></div>
+          <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,transparent 40%,rgba(20,16,13,.5) 78%,rgba(20,16,13,.92) 100%)"></div>
+          <div style="position:relative;height:100%;display:flex;flex-direction:column;padding:0 28px 34px">
+            <div style="display:flex;align-items:center;gap:9px;padding-top:58px">
+              <div style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:15px">🐴</div>
+              <span style="font-weight:800;font-size:13px;letter-spacing:.18em;text-transform:uppercase">Equus Lab</span>
+            </div>
+            <div style="flex:1"></div>
+            <div style="width:36px;height:3px;background:var(--accent);margin-bottom:22px"></div>
+            <div style="font-weight:800;font-size:42px;line-height:.98;letter-spacing:-.03em;margin-bottom:16px">Monta.<br>Analiza.<br>Mejora.</div>
+            <div style="font-size:14.5px;color:rgba(250,247,242,.72);line-height:1.5;max-width:290px;margin-bottom:30px">Tu entrenador de equitación con IA. Sube tu monta y recibe la corrección de un experto en biomecánica.</div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <button onClick="{{ goRegister }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:17px;font-size:14.5px;font-weight:800" style-hover="filter:brightness(1.06)">{{ t.crear }}</button>
+              <div style="display:flex;gap:11px">
+                <button onClick="{{ goLogin }}" style="flex:1;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.06);color:#faf7f2;border-radius:16px;padding:16px;font-size:13.5px;font-weight:700">{{ t.entrar }}</button>
+                <button onClick="{{ demo }}" style="flex:1;border:1px solid rgba(255,255,255,.14);background:none;color:rgba(250,247,242,.75);border-radius:16px;padding:16px;font-size:13.5px;font-weight:700">{{ t.demo }}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== LOGIN ===== -->
+      <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:6px 26px 26px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 24px"><button onClick="{{ goWelcome }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:22px">{{ t.entrar }}</div></div>
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:7px">{{ t.email }}</div>
+          <input value="{{ authEmail }}" onInput="{{ onAuthEmail }}" type="email" placeholder="jinete@equuslab.com" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink);margin-bottom:16px" />
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:7px">{{ t.pass }}</div>
+          <input value="{{ authPass }}" onInput="{{ onAuthPass }}" type="password" placeholder="••••••••" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink);margin-bottom:12px" />
+          <button onClick="{{ goForgot }}" style="border:none;background:none;color:var(--accent);font-size:12.5px;font-weight:700;padding:0;margin-bottom:22px">{{ t.olvidar }}</button>
+          <button onClick="{{ login }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:16px;font-size:14px;font-weight:800;margin-bottom:16px">{{ t.entrar }}</button>
+          <div style="text-align:center;font-size:12.5px;color:var(--m55)">{{ t.sinCuenta }} <a onClick="{{ goRegister }}" style="color:var(--accent);font-weight:700;cursor:pointer">{{ t.crear }}</a></div>
+        </div>
+      </sc-if>
+
+      <!-- ===== REGISTER ===== -->
+      <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:6px 26px 26px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 24px"><button onClick="{{ goWelcome }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:22px">{{ t.crear }}</div></div>
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:7px">{{ t.nombre }}</div>
+          <input value="{{ authName }}" onInput="{{ onAuthName }}" placeholder="Laura" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink);margin-bottom:16px" />
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:7px">{{ t.email }}</div>
+          <input value="{{ authEmail }}" onInput="{{ onAuthEmail }}" type="email" placeholder="jinete@equuslab.com" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink);margin-bottom:16px" />
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:7px">{{ t.pass }}</div>
+          <input value="{{ authPass }}" onInput="{{ onAuthPass }}" type="password" placeholder="Mínimo 8 caracteres" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink);margin-bottom:22px" />
+          <button onClick="{{ login }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:16px;font-size:14px;font-weight:800;margin-bottom:16px">{{ t.crear }}</button>
+          <div style="text-align:center;font-size:12.5px;color:var(--m55)">{{ t.yaCuenta }} <a onClick="{{ goLogin }}" style="color:var(--accent);font-weight:700;cursor:pointer">{{ t.entrar }}</a></div>
+        </div>
+      </sc-if>
+
+      <!-- ===== FORGOT ===== -->
+      <sc-if value="{{ isForgot }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:6px 26px 26px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 24px"><button onClick="{{ goLogin }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:22px">{{ t.recuperar }}</div></div>
+          <sc-if value="{{ authSent }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--tint);border-radius:16px;padding:18px;display:flex;gap:12px;align-items:flex-start;margin-bottom:22px"><span style="font-size:22px">📩</span><div style="font-size:13px;line-height:1.5;color:var(--ink)">{{ t.enviado }}</div></div>
+            <button onClick="{{ goLogin }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:16px;font-size:14px;font-weight:800">{{ t.volver }}</button>
+          </sc-if>
+          <sc-if value="{{ notSent }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:13px;color:var(--m55);line-height:1.5;margin-bottom:18px">Introduce tu correo y te enviaremos un enlace para restablecer la contraseña.</div>
+            <div style="font-weight:800;font-size:12.5px;margin-bottom:7px">{{ t.email }}</div>
+            <input value="{{ authEmail }}" onInput="{{ onAuthEmail }}" type="email" placeholder="jinete@equuslab.com" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink);margin-bottom:22px" />
+            <button onClick="{{ sendReset }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:16px;font-size:14px;font-weight:800">{{ t.enviar }}</button>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===== INICIO ===== -->
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:8px 22px 18px;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:flex-start;margin:6px 0 18px">
+            <div style="flex:1">
+              <div style="font-size:12.5px;color:var(--m55)">{{ greetTime }},</div>
+              <div style="font-weight:800;font-size:25px;line-height:1.1">{{ rider }} 🐴</div>
+            </div>
+            <button onClick="{{ goChat }}" title="Entrenador IA" style="border:none;position:relative;width:46px;height:46px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:20px">🎓<span style="position:absolute;top:9px;right:9px;width:9px;height:9px;border-radius:50%;background:#5a7048;border:2px solid #fff"></span></button>
+          </div>
+          <button onClick="{{ goSubir }}" style="border:none;text-align:left;background:var(--accent);color:#fff;border-radius:24px;padding:22px 22px;margin-bottom:16px;box-shadow:0 10px 24px -8px var(--accent)">
+            <div style="font-weight:800;font-size:18px;margin-bottom:5px">Analizar nueva sesión</div>
+            <div style="font-size:12.5px;opacity:.92;line-height:1.4">Sube un vídeo montando y tu entrenador IA te corrige al momento</div>
+            <div style="margin-top:14px;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.22);border-radius:20px;padding:9px 15px;font-weight:700;font-size:13px">Subir vídeo →</div>
+          </button>
+          <div style="font-weight:800;font-size:13.5px;margin:6px 0 11px">Tu última sesión</div>
+          <button onClick="{{ goResultado }}" style="border:none;text-align:left;width:100%;background:var(--surface);border-radius:18px;padding:14px 15px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;gap:14px;margin-bottom:22px">
+            <div class="striped" style="width:54px;height:54px;border-radius:14px;background:var(--ph);flex:none"></div>
+            <div style="flex:1"><div style="font-weight:700;font-size:14px">Trote reunido · Ondina</div><div style="font-size:11.5px;color:var(--m50);margin-top:2px">Hoy · doma clásica</div></div>
+            <div style="font-weight:800;font-size:20px;color:var(--accent)">7,4</div>
+          </button>
+          <div style="display:flex;gap:10px;margin-bottom:8px">
+            <div style="flex:1;background:var(--tint);border-radius:18px;padding:15px 16px"><div style="font-size:22px;font-weight:800;color:#5a7048;line-height:1">🔥 5</div><div style="font-size:11px;color:var(--m55);margin-top:4px">semanas seguidas</div></div>
+            <div style="flex:1;background:#f3e7df;border-radius:18px;padding:15px 16px"><div style="font-size:22px;font-weight:800;color:var(--accent);line-height:1">24</div><div style="font-size:11px;color:var(--m55);margin-top:4px">sesiones totales</div></div>
+          </div>
+          <sc-if value="{{ notPremium }}" hint-placeholder-val="{{ true }}">
+            <div style="background:var(--surface);border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:14px 16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+              <div style="display:flex;align-items:center;margin-bottom:11px"><span style="font-weight:800;font-size:12.5px">Uso de hoy</span><button onClick="{{ openSub }}" style="margin-left:auto;border:none;background:var(--chip);color:var(--accent);font-weight:700;font-size:10.5px;border-radius:20px;padding:5px 11px">Plan gratis · mejora</button></div>
+              <div style="display:flex;gap:20px">
+                <div style="flex:1"><div style="display:flex;align-items:baseline;gap:4px"><span style="font-weight:800;font-size:19px">{{ analisisLeft }}</span><span style="font-size:11px;color:var(--m50)">/ 2</span></div><div style="font-size:10.5px;color:var(--m55);margin-top:1px">análisis restantes</div></div>
+                <div style="width:1px;background:rgba(0,0,0,.07)"></div>
+                <div style="flex:1"><div style="display:flex;align-items:baseline;gap:4px"><span style="font-weight:800;font-size:19px">{{ chatLeft }}</span><span style="font-size:11px;color:var(--m50)">/ 3</span></div><div style="font-size:10.5px;color:var(--m55);margin-top:1px">preguntas al chat</div></div>
+              </div>
+            </div>
+          </sc-if>
+          <div style="background:var(--tint);border-radius:18px;padding:15px 17px;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:12px;color:#5a7048;margin-bottom:6px"><span>💡</span><span>Consejo del día</span></div>
+            <div style="font-size:12.5px;line-height:1.5;color:var(--ink)">Antes de reunir, activa el impulso: unos trancos de trote medio y vuelve a reunido. La grupa entra sola bajo la masa.</div>
+          </div>
+          <div style="flex:1;min-height:8px"></div>
+          <button onClick="{{ goPerfil }}" style="border:none;text-align:left;width:100%;background:#26221d;color:#faf7f2;border-radius:18px;padding:15px 17px;display:flex;gap:12px;align-items:center">
+            <div style="font-size:22px">🎯</div>
+            <div style="flex:1;font-size:12.5px;line-height:1.4">Objetivo: <b>nota media de 8 en doma</b><div style="height:6px;background:rgba(255,255,255,.18);border-radius:4px;margin-top:8px;overflow:hidden"><div style="width:74%;height:100%;background:var(--accent);border-radius:4px"></div></div></div>
+          </button>
+        </div>
+      </sc-if>
+
+      <!-- ===== SUBIR ===== -->
+      <sc-if value="{{ isSubir }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:8px 22px 18px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 14px"><button onClick="{{ goHome }}" style="border:none;background:none;font-size:22px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:22px">Nueva sesión</div></div>
+          <label class="striped" style="background:var(--ph);border:1.5px dashed #c9a488;border-radius:22px;height:196px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;margin-bottom:20px;cursor:pointer">
+            <input type="file" accept="video/*" onChange="{{ onFile }}" style="display:none" />
+            <div style="width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:25px">↑</div>
+            <div style="font-weight:700;font-size:14px">{{ videoLabel }}</div>
+            <div style="font-size:11.5px;color:var(--m50);text-align:center;line-height:1.4">Monta o trabajo pie a tierra · graba de lado,<br>cuerpo entero del caballo · máx. <b>3 min</b> en gratis · sin límite con Premium</div>
+          </label>
+          <div style="font-weight:800;font-size:13px;margin-bottom:9px">Caballo</div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px">
+            <sc-for list="{{ caballosPick }}" as="c" hint-placeholder-count="2">
+              <button onClick="{{ c.pick }}" style="border:{{ c.border }};border-radius:14px;padding:11px 16px;font-weight:{{ c.weight }};font-size:13px;background:{{ c.bg }};color:{{ c.fg }}">{{ c.nombre }}</button>
+            </sc-for>
+            <button onClick="{{ goPerfil }}" style="border:1px solid rgba(0,0,0,.08);background:var(--surface);border-radius:14px;padding:11px 14px;font-size:13px;color:var(--m40)">＋</button>
+          </div>
+          <div style="font-weight:800;font-size:13px;margin-bottom:9px">Disciplina</div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px">
+            <sc-for list="{{ discPick }}" as="d" hint-placeholder-count="4">
+              <button onClick="{{ d.pick }}" style="border:{{ d.border }};border-radius:14px;padding:10px 15px;font-weight:{{ d.weight }};font-size:12.5px;background:{{ d.bg }};color:{{ d.fg }}">{{ d.label }}</button>
+            </sc-for>
+            <button onClick="{{ addDisciplina }}" style="border:1px dashed rgba(0,0,0,.2);background:none;border-radius:14px;padding:10px 14px;font-size:12.5px;font-weight:600;color:var(--m45)">＋ Otra</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-weight:800;font-size:13px">¿En qué quieres que me centre?</span><span style="background:var(--tint);color:#5a7048;font-weight:700;font-size:10px;border-radius:8px;padding:3px 8px">opcional</span></div>
+          <div style="font-size:11.5px;color:var(--m50);line-height:1.4;margin-bottom:11px">Si lo dejas en <b>Todo el conjunto</b>, analizo la sesión entera. Elige un foco si quieres que insista en algo.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
+            <sc-for list="{{ focos }}" as="f" hint-placeholder-count="5">
+              <button onClick="{{ f.pick }}" style="border:{{ f.border }};border-radius:14px;padding:10px 14px;font-size:12.5px;font-weight:{{ f.weight }};background:{{ f.bg }};color:{{ f.fg }}">{{ f.label }}</button>
+            </sc-for>
+          </div>
+          <div style="background:var(--tint);border-radius:16px;padding:14px 16px;margin-bottom:16px">
+            <div style="font-weight:800;font-size:12px;color:#5a7048;margin-bottom:8px">📹 Para un buen análisis</div>
+            <div style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink);line-height:1.4">
+              <div style="display:flex;gap:8px"><span style="color:#5a7048">✓</span><span>Grábate <b>de lado</b>, con el caballo entero en cuadro</span></div>
+              <div style="display:flex;gap:8px"><span style="color:#5a7048">✓</span><span>Cámara fija o siguiendo en paralelo, sin zoom</span></div>
+              <div style="display:flex;gap:8px"><span style="color:#5a7048">✓</span><span>Buena luz · entre <b>1 y 3 min</b> de un aire limpio</span></div>
+            </div>
+          </div>
+          <button onClick="{{ startAnalysis }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:16px;font-size:14px;font-weight:800">Analizar sesión</button>
+        </div>
+      </sc-if>
+
+      <!-- ===== PROCESANDO ===== -->
+      <sc-if value="{{ isProc }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr" style="flex:1;display:flex;flex-direction:column;padding:16px 26px 14px;background:#26221d;color:#faf7f2">
+          <div class="striped" style="background:#3a332b;border-radius:20px;height:132px;position:relative;overflow:hidden;margin-bottom:26px">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:11px 'IBM Plex Mono',monospace;color:rgba(250,247,242,.4)">{{ caballo }} · {{ ejercicio }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:28px">
+            <div style="width:120px;height:120px;border-radius:50%;background:{{ ringBg }};display:flex;align-items:center;justify-content:center">
+              <div style="width:98px;height:98px;border-radius:50%;background:#26221d;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <div style="font-size:31px;font-weight:800">{{ pct }}<span style="font-size:15px">%</span></div>
+                <div style="font-size:10px;color:rgba(250,247,242,.5);margin-top:1px">analizando</div>
+              </div>
+            </div>
+            <div style="font-size:13px;color:rgba(250,247,242,.6);margin-top:16px;text-align:center;line-height:1.45">Midiendo tu asiento y la biomecánica<br>de {{ caballo }}, ajustada a su raza 🐴</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:13px">
+                <span style="width:24px;height:24px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;background:{{ s.bg }};border:{{ s.border }}">{{ s.mark }}</span>
+                <span style="font-size:13.5px;font-weight:{{ s.weight }};color:{{ s.color }}">{{ s.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="flex:1;min-height:14px"></div>
+          <div style="display:flex;gap:10px;margin-bottom:8px">
+            <div style="flex:1;background:rgba(255,255,255,.06);border-radius:14px;padding:13px 14px"><div style="font:800 20px 'Manrope';color:#e79877;line-height:1">{{ pointCount }}</div><div style="font-size:10.5px;color:rgba(250,247,242,.5);margin-top:3px">puntos del cuerpo</div></div>
+            <div style="flex:1;background:rgba(255,255,255,.06);border-radius:14px;padding:13px 14px"><div style="font:800 20px 'Manrope';color:#e79877;line-height:1">{{ strideCount }}</div><div style="font-size:10.5px;color:rgba(250,247,242,.5);margin-top:3px">trancos leídos</div></div>
+          </div>
+          <div style="text-align:center;font-size:11px;color:rgba(250,247,242,.4);padding:6px 0 2px">Suele tardar menos de 1 minuto</div>
+        </div>
+      </sc-if>
+
+      <!-- ===== RESULTADO ===== -->
+      <sc-if value="{{ isResultado }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <div style="padding:6px 22px 12px;display:flex;align-items:center;gap:10px">
+            <button onClick="{{ goHome }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button>
+            <div style="flex:1"><div style="font-weight:800;font-size:19px;line-height:1.1">{{ resultTitle }}</div><div style="font-size:12px;color:var(--m55);margin-top:2px">{{ caballo }} · {{ focoLabel }} · hoy</div></div>
+          </div>
+          <div style="margin:0 22px;border-radius:22px;overflow:hidden;position:relative;background:var(--ph);height:150px" class="striped">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:11px 'IBM Plex Mono',monospace;color:var(--m40)">{{ videoStamp }}</div>
+            <button onClick="{{ togglePlay }}" style="position:absolute;left:14px;bottom:12px;width:50px;height:50px;border-radius:50%;border:none;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:0 4px 14px rgba(0,0,0,.15)">{{ playIcon }}</button>
+          </div>
+          <div class="eq-body" style="flex:1;overflow:auto;padding:16px 22px 16px">
+            <div style="background:var(--accent);color:#fff;border-radius:22px;padding:18px 20px;display:flex;align-items:center;gap:16px;margin-bottom:12px">
+              <div style="font-size:40px;font-weight:800;line-height:1">7,4</div>
+              <div style="font-size:12.5px;line-height:1.4;opacity:.96">{{ scoreMsg }}</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:18px">
+              <sc-for list="{{ subscores }}" as="ss" hint-placeholder-count="3">
+                <div style="flex:1;background:var(--surface);border-radius:14px;padding:11px 12px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><div style="font-weight:800;font-size:18px;color:{{ ss.color }};line-height:1">{{ ss.val }}</div><div style="font-size:10px;color:var(--m50);margin-top:3px">{{ ss.label }}</div></div>
+              </sc-for>
+            </div>
+            <div style="background:var(--tint);border-radius:16px;padding:14px 16px;margin-bottom:18px">
+              <div style="font-weight:800;font-size:12px;color:#5a7048;margin-bottom:6px">✅ Lo que hiciste bien</div>
+              <div style="font-size:12.5px;line-height:1.5;color:var(--ink)">Ritmo de trote constante y buena disposición del conjunto. Las transiciones ascendentes son limpias.</div>
+            </div>
+            <div style="font-weight:800;font-size:14px;margin-bottom:10px">Lo que puedes mejorar</div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+              <sc-for list="{{ tips }}" as="t" hint-placeholder-count="3">
+                <button onClick="{{ t.seek }}" style="border:none;text-align:left;background:var(--surface);border-radius:16px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;gap:12px;align-items:flex-start;width:100%">
+                  <span style="background:var(--chip);color:var(--accent);font-weight:800;font-size:11px;border-radius:8px;padding:5px 8px;flex:none">{{ t.time }}</span>
+                  <span style="font-size:13px;line-height:1.45;color:var(--ink)">{{ t.text }}</span>
+                </button>
+              </sc-for>
+            </div>
+            <div style="background:var(--tint);border-radius:18px;padding:16px 17px;margin-bottom:16px">
+              <div style="font-weight:800;font-size:12.5px;color:#5a7048;margin-bottom:5px">💪 Ejercicio de la semana</div>
+              <div style="font-size:12.5px;line-height:1.5;color:var(--ink)">Transiciones trote–paso–trote cada 8 trancos para que {{ caballo }} meta la grupa bajo la masa.</div>
+            </div>
+            <button onClick="{{ goComparacion }}" style="width:100%;border:none;background:#26221d;color:#faf7f2;border-radius:16px;padding:15px;font-size:13.5px;font-weight:700">Ver comparación con la referencia</button>
+          </div>
+          <button onClick="{{ goChat }}" style="border:none;padding:12px 20px 24px;background:var(--nav);display:flex;align-items:center;gap:10px;width:100%;text-align:left">
+            <div style="flex:1;background:var(--surface);border-radius:22px;padding:12px 16px;font-size:12.5px;color:var(--m45)">Habla con tu entrenador…</div>
+            <div style="width:42px;height:42px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px">↑</div>
+          </button>
+        </div>
+      </sc-if>
+
+      <!-- ===== COMPARACIÓN ===== -->
+      <sc-if value="{{ isComparacion }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:6px 22px 22px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 14px"><button onClick="{{ goResultado }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:20px">Comparación</div></div>
+          <div style="position:relative;border-radius:20px;overflow:hidden;background:var(--ph);height:158px;margin-bottom:10px" class="striped">
+            <div style="position:absolute;top:12px;left:14px;background:var(--accent);color:#fff;font-weight:700;font-size:11px;border-radius:10px;padding:5px 10px">Tu monta · 0:34</div>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:10.5px 'IBM Plex Mono',monospace;color:var(--m40)">frame del vídeo</div>
+          </div>
+          <div style="position:relative;border-radius:20px;overflow:hidden;background:#dbe3d5;height:158px;margin-bottom:16px" class="striped">
+            <div style="position:absolute;top:12px;left:14px;background:#5a7048;color:#fff;font-weight:700;font-size:11px;border-radius:10px;padding:5px 10px">Referencia · nivel San Jorge</div>
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:10.5px 'IBM Plex Mono',monospace;color:var(--m40)">técnica correcta</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:#26221d;color:#faf7f2;border-radius:14px;padding:12px 15px;margin-bottom:18px">
+            <button onClick="{{ togglePlay }}" style="border:none;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-size:14px">{{ playIcon }}</button>
+            <div style="flex:1;height:6px;background:rgba(255,255,255,.16);border-radius:4px;overflow:hidden"><div style="width:40%;height:100%;background:var(--accent);border-radius:4px"></div></div>
+            <span style="font:600 11px 'IBM Plex Mono',monospace">0:34</span>
+          </div>
+          <div style="font-weight:800;font-size:13.5px;margin-bottom:11px">Diferencias clave</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:12px;background:var(--surface);border-radius:14px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><span style="color:var(--accent);font-size:16px;flex:none">↕</span><span style="font-size:12.5px;line-height:1.45;color:var(--ink)"><b>Línea de manos:</b> la referencia mantiene codo–mano–boca recta; tú la rompes 6 cm hacia arriba.</span></div>
+            <div style="display:flex;gap:12px;background:var(--surface);border-radius:14px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><span style="color:var(--accent);font-size:16px;flex:none">∠</span><span style="font-size:12.5px;line-height:1.45;color:var(--ink)"><b>Talón:</b> referencia a −4°, tú a +11°. Peso al estribo para bajarlo.</span></div>
+            <div style="display:flex;gap:12px;background:var(--surface);border-radius:14px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><span style="color:#5a7048;font-size:16px;flex:none">✓</span><span style="font-size:12.5px;line-height:1.45;color:var(--ink)"><b>Ritmo:</b> tu cadencia de trote coincide con la referencia. ¡Bien!</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== CHAT ===== -->
+      <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr" style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--nav)">
+          <div style="display:flex;align-items:center;gap:11px;padding:6px 20px 12px;background:var(--bg);border-bottom:1px solid rgba(0,0,0,.05)">
+            <button onClick="{{ backFromChat }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button>
+            <div style="width:38px;height:38px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px">🎓</div>
+            <div style="flex:1"><div style="font-weight:800;font-size:14px">Entrenador IA</div><div style="font-size:11px;color:#5a7048">● en línea · doma & salto</div></div>
+          </div>
+          <div class="eq-body" style="flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ messages }}" as="m" hint-placeholder-count="2">
+              <div class="eq-msg" style="max-width:80%;align-self:{{ m.align }};background:{{ m.bg }};color:{{ m.fg }};border-radius:{{ m.radius }};padding:11px 14px;font-size:13px;line-height:1.45;box-shadow:0 1px 2px rgba(0,0,0,.05)">{{ m.text }}</div>
+            </sc-for>
+          </div>
+          <div style="background:var(--bg);padding:8px 14px 0;display:flex;gap:8px;overflow-x:auto">
+            <sc-for list="{{ suggestions }}" as="q" hint-placeholder-count="3">
+              <button onClick="{{ q.ask }}" style="border:1px solid rgba(192,95,58,.35);background:var(--surface);color:var(--accent);border-radius:20px;padding:8px 13px;font-size:12px;font-weight:600;white-space:nowrap;flex:none">{{ q.label }}</button>
+            </sc-for>
+          </div>
+          <div style="padding:10px 16px 24px;background:var(--bg);display:flex;align-items:center;gap:10px">
+            <input value="{{ chatInput }}" onInput="{{ onChatInput }}" onKeyDown="{{ onChatKey }}" placeholder="Escribe tu pregunta…" style="flex:1;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:22px;padding:12px 16px;font-size:13px;font-family:inherit;outline:none;color:var(--ink)" />
+            <button onClick="{{ sendChat }}" style="border:none;width:42px;height:42px;border-radius:50%;background:var(--accent);color:#fff;font-size:17px">↑</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== PROGRESO ===== -->
+      <sc-if value="{{ isProgreso }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:8px 22px 16px">
+          <div style="font-weight:800;font-size:24px;line-height:1.1;margin:6px 0 16px">Tu progreso</div>
+          <div style="display:flex;gap:10px;margin-bottom:20px">
+            <div style="flex:1;background:var(--surface);border-radius:18px;padding:14px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><div style="font-size:26px;font-weight:800;color:var(--accent);line-height:1">7,4</div><div style="font-size:11px;color:var(--m50);margin-top:3px">nota media</div></div>
+            <div style="flex:1;background:var(--surface);border-radius:18px;padding:14px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><div style="font-size:26px;font-weight:800;line-height:1">24</div><div style="font-size:11px;color:var(--m50);margin-top:3px">sesiones</div></div>
+            <div style="flex:1;background:var(--surface);border-radius:18px;padding:14px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)"><div style="font-size:26px;font-weight:800;line-height:1">🔥5</div><div style="font-size:11px;color:var(--m50);margin-top:3px">semanas</div></div>
+          </div>
+          <div style="background:var(--surface);border-radius:20px;padding:17px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:22px">
+            <div style="display:flex;align-items:baseline;margin-bottom:14px"><span style="font-weight:800;font-size:13.5px">Evolución de la nota</span><span style="margin-left:auto;font-size:11px;color:#5a7048;font-weight:700">↑ +1,2 este mes</span></div>
+            <div style="display:flex;align-items:flex-end;gap:9px;height:96px">
+              <div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px"><div style="width:100%;background:#f0d9cd;border-radius:6px;height:52%"></div><span style="font-size:9.5px;color:var(--m40)">M</span></div>
+              <div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px"><div style="width:100%;background:#f0d9cd;border-radius:6px;height:60%"></div><span style="font-size:9.5px;color:var(--m40)">M</span></div>
+              <div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px"><div style="width:100%;background:#f0d9cd;border-radius:6px;height:57%"></div><span style="font-size:9.5px;color:var(--m40)">J</span></div>
+              <div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px"><div style="width:100%;background:#e5b39c;border-radius:6px;height:70%"></div><span style="font-size:9.5px;color:var(--m40)">V</span></div>
+              <div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px"><div style="width:100%;background:#e5b39c;border-radius:6px;height:66%"></div><span style="font-size:9.5px;color:var(--m40)">S</span></div>
+              <div style="flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px"><div style="width:100%;background:var(--accent);border-radius:6px;height:82%"></div><span style="font-size:9.5px;color:var(--accent);font-weight:700">D</span></div>
+            </div>
+          </div>
+          <div style="background:var(--surface);border-radius:20px;padding:17px 18px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:22px">
+            <div style="font-weight:800;font-size:13.5px;margin-bottom:14px">Por destreza</div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ skills }}" as="sk" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex;font-size:12px;margin-bottom:5px"><span style="color:var(--ink)">{{ sk.label }}</span><span style="margin-left:auto;font-weight:700;color:{{ sk.color }}">{{ sk.val }}</span></div>
+                  <div style="height:7px;background:#efe7df;border-radius:4px;overflow:hidden"><div style="width:{{ sk.pct }};height:100%;background:{{ sk.color }};border-radius:4px"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="font-weight:800;font-size:13.5px;margin-bottom:11px">Sesiones recientes</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button onClick="{{ goResultado }}" style="border:none;text-align:left;background:var(--surface);border-radius:16px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;align-items:center;gap:13px;width:100%"><div class="striped" style="width:46px;height:46px;border-radius:12px;background:var(--ph);flex:none"></div><div style="flex:1"><div style="font-weight:700;font-size:13px">Trote reunido · Ondina</div><div style="font-size:11px;color:var(--m50)">Hoy · doma clásica</div></div><div style="font-weight:800;font-size:17px;color:var(--accent)">7,4</div></button>
+            <div style="background:var(--surface);border-radius:16px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;align-items:center;gap:13px"><div class="striped" style="width:46px;height:46px;border-radius:12px;background:var(--ph);flex:none"></div><div style="flex:1"><div style="font-weight:700;font-size:13px">Gimnasia de salto · Trueno</div><div style="font-size:11px;color:var(--m50)">Ayer · salto</div></div><div style="font-weight:800;font-size:17px;color:var(--ink)">6,9</div></div>
+            <div style="background:var(--surface);border-radius:16px;padding:13px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;align-items:center;gap:13px"><div class="striped" style="width:46px;height:46px;border-radius:12px;background:var(--ph);flex:none"></div><div style="flex:1"><div style="font-weight:700;font-size:13px">Cesión a la pierna · Ondina</div><div style="font-size:11px;color:var(--m50)">Lun · doma clásica</div></div><div style="font-weight:800;font-size:17px;color:var(--ink)">7,1</div></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== PERFIL ===== -->
+      <sc-if value="{{ isPerfil }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:8px 22px 16px">
+          <div style="display:flex;align-items:center;margin:2px 0 -6px"><div style="font-weight:800;font-size:16px">{{ navL3 }}</div><button onClick="{{ goAjustesMenu }}" title="Ajustes" style="margin-left:auto;border:none;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.08);width:40px;height:40px;border-radius:50%;font-size:19px">⚙️</button></div>
+          <div style="display:flex;flex-direction:column;align-items:center;padding:6px 0 20px">
+            <div class="striped" style="width:82px;height:82px;border-radius:50%;background:var(--ph);border:3px solid var(--accent)"></div>
+            <div style="font-weight:800;font-size:20px;margin-top:12px">{{ rider }}</div>
+            <div style="font-size:12.5px;color:var(--m55);margin-top:2px">{{ nivel }} · {{ riderEdad }} años · {{ riderAnios }} montando</div>
+            <button onClick="{{ openEditarPerfil }}" style="border:1px solid rgba(0,0,0,.12);background:var(--surface);color:var(--ink);font-weight:700;font-size:11.5px;border-radius:20px;padding:8px 16px;margin-top:12px">Editar perfil</button>
+            <div style="display:flex;gap:7px;margin-top:12px">
+              <span style="background:var(--chip);color:var(--accent);font-weight:700;font-size:11px;border-radius:20px;padding:6px 12px">🏅 5 semanas</span>
+              <span style="background:var(--tint);color:#5a7048;font-weight:700;font-size:11px;border-radius:20px;padding:6px 12px">Doma</span>
+              <span style="background:var(--tint);color:#5a7048;font-weight:700;font-size:11px;border-radius:20px;padding:6px 12px">Salto</span>
+            </div>
+          </div>
+          <div style="display:flex;background:var(--surface);border-radius:18px;padding:16px 8px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:22px">
+            <div style="flex:1;text-align:center"><div style="font-weight:800;font-size:19px;line-height:1">24</div><div style="font-size:10px;color:var(--m50);margin-top:3px">sesiones</div></div>
+            <div style="width:1px;background:rgba(0,0,0,.07)"></div>
+            <div style="flex:1;text-align:center"><div style="font-weight:800;font-size:19px;color:var(--accent);line-height:1">7,4</div><div style="font-size:10px;color:var(--m50);margin-top:3px">nota media</div></div>
+            <div style="width:1px;background:rgba(0,0,0,.07)"></div>
+            <div style="flex:1;text-align:center"><div style="font-weight:800;font-size:19px;line-height:1">3</div><div style="font-size:10px;color:var(--m50);margin-top:3px">concursos</div></div>
+            <div style="width:1px;background:rgba(0,0,0,.07)"></div>
+            <div style="flex:1;text-align:center"><div style="font-weight:800;font-size:19px;line-height:1">18h</div><div style="font-size:10px;color:var(--m50);margin-top:3px">analizadas</div></div>
+          </div>
+          <div style="font-weight:800;font-size:13.5px;margin-bottom:11px">Mis caballos</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:22px">
+            <sc-for list="{{ caballos }}" as="c" hint-placeholder-count="2">
+              <div style="background:var(--surface);border-radius:16px;padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;align-items:center;gap:11px"><div style="width:48px;height:48px;border-radius:14px;flex:none;background:{{ c.avBg }};display:flex;align-items:center;justify-content:center;font-size:24px;position:relative">🐴<sc-if value="{{ c.avHasBadge }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;right:-3px;bottom:-3px;width:18px;height:18px;border-radius:50%;background:{{ c.avColor }};color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface)">{{ c.avGlyph }}</span></sc-if></div><button onClick="{{ c.edit }}" style="border:none;background:none;text-align:left;flex:1;min-width:0;display:flex;align-items:center;gap:13px;padding:0"><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13.5px;color:var(--ink)">{{ c.nombre }}</div><div style="font-size:11px;color:var(--m50)">{{ c.info }}</div></div><div style="text-align:right;flex:none"><div style="font-weight:800;font-size:15px;color:var(--ink)">{{ c.nota }}</div><div style="font-size:10px;color:var(--m45)">{{ c.ses }}</div></div></button><button onClick="{{ c.del }}" title="Eliminar" style="border:none;background:none;color:var(--m30);font-size:18px;padding:0 2px;flex:none">✕</button></div>
+            </sc-for>
+            <button onClick="{{ addCaballo }}" style="border:1px dashed rgba(0,0,0,.15);background:none;border-radius:16px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--m45);font-size:12.5px;font-weight:600;width:100%"><span style="font-size:18px">＋</span>Añadir caballo</button>
+          </div>
+          <div style="font-weight:800;font-size:13.5px;margin-bottom:11px">Logros</div>
+          <div style="display:flex;gap:9px;margin-bottom:22px">
+            <sc-for list="{{ logros }}" as="l" hint-placeholder-count="4">
+              <div title="{{ l.name }}" style="flex:1;background:{{ l.bg }};border-radius:16px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;opacity:{{ l.op }}"><div style="font-size:22px">{{ l.icon }}</div><div style="font-size:9.5px;font-weight:700;color:{{ l.fg }};text-align:center;line-height:1.2">{{ l.name }}</div></div>
+            </sc-for>
+          </div>
+          <div style="font-weight:800;font-size:13.5px;margin-bottom:11px">Mi objetivo</div>
+          <div style="background:var(--tint);border-radius:18px;padding:16px 17px;margin-bottom:22px;display:flex;gap:13px;align-items:center"><div style="font-size:24px">🎯</div><div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--ink)">Nota media de 8 en doma</div><div style="height:7px;background:#d8e0d0;border-radius:4px;margin-top:8px;overflow:hidden"><div style="width:74%;height:100%;background:#5a7048;border-radius:4px"></div></div></div></div>
+        </div>
+      </sc-if>
+
+      <!-- ===== MENÚ DE AJUSTES ===== -->
+      <sc-if value="{{ isAjustesMenu }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:6px 22px 22px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 18px"><button onClick="{{ goPerfil }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:20px">⚙️ Ajustes</div></div>
+
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:8px">{{ idiomaWord }}</div>
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <sc-for list="{{ langOpts }}" as="l" hint-placeholder-count="2"><button onClick="{{ l.pick }}" style="flex:1;border:{{ l.border }};border-radius:14px;padding:12px 8px;font-size:12.5px;font-weight:{{ l.weight }};background:{{ l.bg }};color:{{ l.fg }}">{{ l.label }}</button></sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:15px 16px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:18px">
+            <span style="font-size:17px">🌙</span>
+            <div style="flex:1"><div style="font-weight:800;font-size:13px">{{ t.oscuro }}</div><div style="font-size:11px;color:var(--m55);margin-top:2px">{{ t.oscuroD }}</div></div>
+            <button onClick="{{ toggleTheme }}" style="border:none;flex:none;width:44px;height:26px;border-radius:20px;background:{{ themeTrack }};position:relative;transition:background .2s"><span style="position:absolute;top:2px;left:{{ themeKnob }};width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s"></span></button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;background:var(--surface);border-radius:18px;padding:6px 4px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:18px">
+            <button onClick="{{ openNotif }}" style="border:none;background:none;text-align:left;width:100%;padding:14px 16px;font-size:13.5px;display:flex;align-items:center;color:var(--ink)">Notificaciones <span style="margin-left:auto;color:var(--m30)">›</span></button>
+            <button onClick="{{ openSub }}" style="border:none;background:none;text-align:left;width:100%;padding:14px 16px;font-size:13.5px;display:flex;align-items:center;color:var(--ink);border-top:1px solid rgba(0,0,0,.05)">Suscripción · <b style="color:#5a7048;margin-left:4px">Premium</b><span style="margin-left:auto;color:var(--m30)">›</span></button>
+          </div>
+          <button onClick="{{ cerrarSesion }}" style="border:none;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.05);text-align:left;width:100%;border-radius:18px;padding:16px;font-size:13.5px;display:flex;align-items:center;color:var(--ink);font-weight:700;margin-bottom:10px">Cerrar sesión<span style="margin-left:auto;color:var(--m40)">↩</span></button>
+          <div style="background:var(--surface);border:1px solid rgba(192,71,58,.3);border-radius:18px;padding:16px">
+            <div style="font-weight:800;font-size:13px;color:#c0473a;margin-bottom:4px">Eliminar perfil</div>
+            <div style="font-size:12px;line-height:1.5;color:var(--ink);margin-bottom:14px">Borra tu perfil y todos tus datos (caballos, sesiones y concursos) de forma permanente.</div>
+            <sc-if value="{{ notDelAcc }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ askDelAccount }}" style="width:100%;border:1px solid #c0473a;background:none;color:#c0473a;border-radius:14px;padding:13px;font-size:13px;font-weight:700">Eliminar perfil</button>
+            </sc-if>
+            <sc-if value="{{ confirmDelAcc }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:9px">
+                <button onClick="{{ dismissDelAccount }}" style="flex:1;border:1px solid rgba(0,0,0,.12);background:var(--surface);color:var(--ink);border-radius:14px;padding:13px;font-size:12.5px;font-weight:700">Cancelar</button>
+                <button onClick="{{ delAccount }}" style="flex:1;border:none;background:#c0473a;color:#fff;border-radius:14px;padding:13px;font-size:12.5px;font-weight:700">Sí, eliminar</button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== CONCURSOS ===== -->
+      <sc-if value="{{ isConcursos }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:8px 22px 16px">
+          <div style="margin:6px 0 4px;font-weight:800;font-size:24px;line-height:1.1">Concursos</div>
+          <div style="font-size:12.5px;color:var(--m55);line-height:1.45;margin-bottom:18px">Grábate haciendo una prueba completa y la IA la juzga como un <b>juez real</b>: nota por movimiento, coeficientes y veredicto final.</div>
+
+          <button onClick="{{ startConcurso }}" style="border:none;text-align:left;width:100%;background:#26221d;color:#faf7f2;border-radius:22px;padding:20px 22px;margin-bottom:20px;box-shadow:0 10px 24px -10px var(--m60)">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="font-size:20px">⚖️</span><span style="font-weight:800;font-size:17px">Simular una prueba</span></div>
+            <div style="font-size:12.5px;opacity:.85;line-height:1.4">Elige disciplina y prueba, grábate y recibe una hoja de puntuación oficial.</div>
+            <div style="margin-top:14px;display:inline-flex;align-items:center;gap:8px;background:var(--accent);border-radius:20px;padding:9px 15px;font-weight:700;font-size:13px">Empezar simulacro →</div>
+          </button>
+
+          <div style="font-weight:800;font-size:13px;margin-bottom:10px">Disciplinas</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
+            <sc-for list="{{ disciplinas }}" as="d" hint-placeholder-count="5">
+              <button onClick="{{ d.pick }}" style="border:{{ d.border }};border-radius:14px;padding:10px 14px;font-size:12.5px;font-weight:{{ d.weight }};background:{{ d.bg }};color:{{ d.fg }}">{{ d.label }}</button>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;align-items:baseline;margin-bottom:11px"><span style="font-weight:800;font-size:13.5px">Veredictos recientes</span><span style="margin-left:auto;font-size:11px;color:var(--m40)">{{ concCount }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ veredictos }}" as="v" hint-placeholder-count="3">
+              <button onClick="{{ v.open }}" style="border:none;text-align:left;width:100%;background:var(--surface);border-radius:16px;padding:14px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;align-items:center;gap:13px">
+                <div class="striped" style="width:46px;height:46px;border-radius:12px;background:var(--ph);flex:none;display:flex;align-items:center;justify-content:center;font-size:18px">{{ v.icon }}</div>
+                <div style="flex:1"><div style="font-weight:700;font-size:13px">{{ v.prueba }}</div><div style="font-size:11px;color:var(--m50)">{{ v.meta }}</div></div>
+                <div style="text-align:right"><div style="font-weight:800;font-size:16px;color:var(--accent)">{{ v.pct }}</div><div style="font-size:10px;color:var(--m45)">{{ v.puesto }}</div></div>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== VEREDICTO (hoja del juez IA) ===== -->
+      <sc-if value="{{ isVeredicto }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <div style="padding:6px 22px 12px;display:flex;align-items:center;gap:10px">
+            <button onClick="{{ goConcursos }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button>
+            <div style="flex:1"><div style="font-weight:800;font-size:17px;line-height:1.1">{{ verTitle }}</div><div style="font-size:12px;color:var(--m55);margin-top:2px">{{ verMeta }} · juez IA</div></div>
+          </div>
+          <div class="eq-body" style="flex:1;overflow:auto;padding:6px 22px 20px">
+            <div style="background:#26221d;color:#faf7f2;border-radius:22px;padding:20px;display:flex;align-items:center;gap:18px;margin-bottom:18px">
+              <div><div style="font-size:40px;font-weight:800;line-height:1">68,4<span style="font-size:20px">%</span></div><div style="font-size:11px;color:rgba(250,247,242,.55);margin-top:3px">puntuación final</div></div>
+              <div style="flex:1;border-left:1px solid rgba(255,255,255,.14);padding-left:16px;font-size:12px;line-height:1.5;color:rgba(250,247,242,.85)">Prueba <b>buena</b>. Puesto estimado <b>2.º de 8</b>. Sólida en trabajo lateral; mejora la reunión al galope.</div>
+            </div>
+
+            <div style="font-weight:800;font-size:13.5px;margin-bottom:10px">Notas por movimiento</div>
+            <div style="background:var(--surface);border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);overflow:hidden;margin-bottom:18px">
+              <sc-for list="{{ sheetRows }}" as="r" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:12px;padding:12px 15px;border-bottom:1px solid rgba(0,0,0,.05)">
+                  <span style="width:22px;font:700 11px 'IBM Plex Mono',monospace;color:var(--m35);flex:none">{{ r.n }}</span>
+                  <span style="flex:1;font-size:12.5px;color:var(--ink);line-height:1.35">{{ r.mov }}</span>
+                  <span style="font:600 10px 'IBM Plex Mono',monospace;color:var(--m40)">{{ r.coef }}</span>
+                  <span style="font-weight:800;font-size:15px;color:{{ r.notaColor }};width:34px;text-align:right">{{ r.nota }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="font-weight:800;font-size:13.5px;margin-bottom:10px">Notas de conjunto</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+              <sc-for list="{{ colectivas }}" as="c" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:12px;padding:11px 15px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+                  <span style="flex:1;font-size:12.5px;color:var(--ink)">{{ c.k }}</span>
+                  <span style="font-weight:800;font-size:14px;color:{{ c.notaColor }}">{{ c.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="background:var(--chip);border-radius:16px;padding:15px 16px;margin-bottom:18px">
+              <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:12px;color:var(--accent);margin-bottom:6px"><span>⚖️</span><span>Comentario del juez IA</span></div>
+              <div style="font-size:12.5px;line-height:1.55;color:var(--ink)">Ejecución limpia y ritmo constante. El hombro adentro pierde ángulo al final; en los apoyos al galope falta salto y expresión. Trabaja la reunión desde el impulso para subir las notas altas.</div>
+            </div>
+
+            <button onClick="{{ goChat }}" style="width:100%;border:none;background:#26221d;color:#faf7f2;border-radius:16px;padding:15px;font-size:13.5px;font-weight:700">Preguntar al juez IA cómo mejorar</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== NUEVO CABALLO ===== -->
+      <sc-if value="{{ isNuevoCaballo }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:6px 22px 22px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 18px"><button onClick="{{ goPerfil }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:20px">{{ caballoFormTitle }}</div></div>
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:7px">Nombre</div>
+          <input value="{{ nc.nombre }}" onInput="{{ ncNombre }}" placeholder="Ej. Ondina" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink);margin-bottom:16px" />
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:7px">Raza</div>
+          <input value="{{ nc.raza }}" onInput="{{ ncRaza }}" list="razas" placeholder="Ej. PRE, KWPN, Lusitano…" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink);margin-bottom:6px" />
+          <datalist id="razas"><option value="PRE (Pura Raza Española)"></option><option value="Lusitano"></option><option value="KWPN"></option><option value="Hispano-árabe"></option><option value="Pura Sangre Inglés"></option><option value="Hannoveriano"></option><option value="Poni"></option></datalist>
+          <div style="display:flex;gap:8px;background:var(--tint);border-radius:12px;padding:11px 13px;margin-bottom:16px;font-size:11.5px;line-height:1.4;color:var(--ink)"><span style="color:#5a7048">💡</span><span>La raza ajusta el análisis: la IA adapta los aires y la biomecánica esperada según la morfología (p. ej. un PRE reúne distinto que un KWPN de salto).</span></div>
+          <div style="display:flex;gap:12px;margin-bottom:16px">
+            <div style="flex:1"><div style="font-weight:800;font-size:12.5px;margin-bottom:7px">Edad</div><input value="{{ nc.edad }}" onInput="{{ ncEdad }}" placeholder="años" inputmode="numeric" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink)" /></div>
+            <div style="flex:1"><div style="font-weight:800;font-size:12.5px;margin-bottom:7px">Alzada <span style="color:var(--m40);font-weight:600">· opcional</span></div><input value="{{ nc.alzada }}" onInput="{{ ncAlzada }}" placeholder="cm" inputmode="numeric" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink)" /></div>
+          </div>
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:8px">Tipo</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+            <sc-for list="{{ tipoOpts }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.pick }}" style="border:{{ t.border }};border-radius:14px;padding:10px 15px;font-size:12.5px;font-weight:{{ t.weight }};background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</button></sc-for>
+          </div>
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:8px">Disciplina principal</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+            <sc-for list="{{ ncDiscOpts }}" as="d" hint-placeholder-count="4"><button onClick="{{ d.pick }}" style="border:{{ d.border }};border-radius:14px;padding:10px 15px;font-size:12.5px;font-weight:{{ d.weight }};background:{{ d.bg }};color:{{ d.fg }}">{{ d.label }}</button></sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="font-weight:800;font-size:12.5px">Nivel que crees que tiene</span><span style="background:var(--tint);color:#5a7048;font-weight:700;font-size:10px;border-radius:8px;padding:3px 8px">opcional</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px">
+            <sc-for list="{{ ncNivelOpts }}" as="n" hint-placeholder-count="3"><button onClick="{{ n.pick }}" style="border:{{ n.border }};border-radius:14px;padding:10px 15px;font-size:12.5px;font-weight:{{ n.weight }};background:{{ n.bg }};color:{{ n.fg }}">{{ n.label }}</button></sc-for>
+          </div>
+          <div style="display:flex;gap:8px;background:var(--tint);border-radius:12px;padding:11px 13px;margin-bottom:26px;font-size:11.5px;line-height:1.4;color:var(--ink)"><span style="color:#5a7048">🤖</span><span>Puedes dejarlo en blanco: la IA estimará el nivel real del caballo y del jinete tras analizar los primeros vídeos.</span></div>
+          <button onClick="{{ saveCaballo }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:16px;font-size:14px;font-weight:800">{{ caballoFormBtn }}</button>
+        </div>
+      </sc-if>
+
+      <!-- ===== EDITAR PERFIL ===== -->
+      <sc-if value="{{ isEditarPerfil }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:6px 22px 22px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 18px"><button onClick="{{ goPerfil }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:20px">Editar perfil</div></div>
+          <div style="display:flex;justify-content:center;margin-bottom:22px"><div class="striped" style="width:82px;height:82px;border-radius:50%;background:var(--ph);border:3px solid var(--accent)"></div></div>
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:7px">Nombre del jinete</div>
+          <input value="{{ pf.nombre }}" onInput="{{ pfNombre }}" placeholder="Tu nombre" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink);margin-bottom:16px" />
+          <div style="display:flex;gap:12px;margin-bottom:16px">
+            <div style="flex:1"><div style="font-weight:800;font-size:12.5px;margin-bottom:7px">Edad</div><input value="{{ pf.edad }}" onInput="{{ pfEdad }}" placeholder="años" inputmode="numeric" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink)" /></div>
+            <div style="flex:1"><div style="font-weight:800;font-size:12.5px;margin-bottom:7px">Años montando</div><input value="{{ pf.anios }}" onInput="{{ pfAnios }}" placeholder="años" inputmode="numeric" style="width:100%;border:1px solid rgba(0,0,0,.1);background:var(--surface);border-radius:14px;padding:13px 15px;font-size:13.5px;font-family:inherit;outline:none;color:var(--ink)" /></div>
+          </div>
+          <div style="font-weight:800;font-size:12.5px;margin-bottom:8px">Nivel</div>
+          <div style="display:flex;gap:8px;margin-bottom:26px">
+            <sc-for list="{{ nivelOpts }}" as="n" hint-placeholder-count="3"><button onClick="{{ n.pick }}" style="flex:1;border:{{ n.border }};border-radius:14px;padding:12px 8px;font-size:12.5px;font-weight:{{ n.weight }};background:{{ n.bg }};color:{{ n.fg }}">{{ n.label }}</button></sc-for>
+          </div>
+          <button onClick="{{ savePerfil }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:16px;font-size:14px;font-weight:800">Guardar cambios</button>
+        </div>
+      </sc-if>
+
+      <!-- ===== APP (idioma / oscuro / eliminar cuenta) ===== -->
+      <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:6px 22px 22px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 18px"><button onClick="{{ goPerfil }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:20px">{{ t.app }}</div></div>
+
+          <div style="background:var(--surface);border-radius:18px;padding:16px 16px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:16px">
+            <div style="font-weight:800;font-size:13px;margin-bottom:3px">{{ t.idioma }}</div>
+            <div style="font-size:11.5px;color:var(--m55);margin-bottom:12px">{{ t.idiomaD }}</div>
+            <div style="display:flex;gap:8px">
+              <sc-for list="{{ langOpts }}" as="l" hint-placeholder-count="2"><button onClick="{{ l.pick }}" style="flex:1;border:{{ l.border }};border-radius:14px;padding:12px 8px;font-size:12.5px;font-weight:{{ l.weight }};background:{{ l.bg }};color:{{ l.fg }}">{{ l.label }}</button></sc-for>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:18px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);margin-bottom:26px">
+            <div style="flex:1"><div style="font-weight:800;font-size:13px">{{ t.oscuro }}</div><div style="font-size:11.5px;color:var(--m55);margin-top:2px">{{ t.oscuroD }}</div></div>
+            <button onClick="{{ toggleTheme }}" style="border:none;flex:none;width:44px;height:26px;border-radius:20px;background:{{ themeTrack }};position:relative;transition:background .2s"><span style="position:absolute;top:2px;left:{{ themeKnob }};width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s"></span></button>
+          </div>
+
+          <div style="font-weight:800;font-size:12px;color:#c0473a;margin-bottom:10px;letter-spacing:.02em">{{ t.elimCuenta }}</div>
+          <div style="background:var(--surface);border:1px solid rgba(192,71,58,.3);border-radius:18px;padding:16px">
+            <div style="font-size:12.5px;line-height:1.5;color:var(--ink);margin-bottom:14px">{{ t.elimCuentaD }}</div>
+            <sc-if value="{{ notDelAcc }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ askDelAccount }}" style="width:100%;border:1px solid #c0473a;background:none;color:#c0473a;border-radius:14px;padding:13px;font-size:13px;font-weight:700">{{ t.elimCuenta }}</button>
+            </sc-if>
+            <sc-if value="{{ confirmDelAcc }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:9px">
+                <button onClick="{{ dismissDelAccount }}" style="flex:1;border:1px solid rgba(0,0,0,.12);background:var(--surface);color:var(--ink);border-radius:14px;padding:13px;font-size:12.5px;font-weight:700">{{ t.cancelar }}</button>
+                <button onClick="{{ delAccount }}" style="flex:1;border:none;background:#c0473a;color:#fff;border-radius:14px;padding:13px;font-size:12.5px;font-weight:700">{{ t.confirmar }}</button>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== AJUSTES (detalle) ===== -->
+      <sc-if value="{{ isAjustes }}" hint-placeholder-val="{{ false }}">
+        <div class="eq-scr eq-body" style="flex:1;overflow:auto;padding:6px 22px 22px">
+          <div style="display:flex;align-items:center;gap:10px;margin:6px 0 18px"><button onClick="{{ goPerfil }}" style="border:none;background:none;font-size:20px;color:var(--m40);padding:0">‹</button><div style="font-weight:800;font-size:20px">{{ ajusteTitle }}</div></div>
+
+          <sc-if value="{{ isAjNivel }}" hint-placeholder-val="{{ false }}">
+            <div style="font-weight:800;font-size:13px;margin-bottom:10px">Tu nivel</div>
+            <div style="display:flex;gap:8px;margin-bottom:22px">
+              <sc-for list="{{ nivelOpts }}" as="n" hint-placeholder-count="3">
+                <button onClick="{{ n.pick }}" style="flex:1;border:{{ n.border }};border-radius:14px;padding:12px 8px;font-size:12.5px;font-weight:{{ n.weight }};background:{{ n.bg }};color:{{ n.fg }}">{{ n.label }}</button>
+              </sc-for>
+            </div>
+            <div style="font-weight:800;font-size:13px;margin-bottom:10px">Disciplinas que practicas</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ discRows }}" as="d" hint-placeholder-count="4">
+                <button onClick="{{ d.pick }}" style="border:{{ d.border }};border-radius:14px;padding:10px 14px;font-size:12.5px;font-weight:{{ d.weight }};background:{{ d.bg }};color:{{ d.fg }}">{{ d.label }}</button>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isAjNotif }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:2px;background:var(--surface);border-radius:18px;padding:4px;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+              <sc-for list="{{ notifRows }}" as="r" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:12px;padding:14px 14px;border-bottom:1px solid rgba(0,0,0,.05)">
+                  <div style="flex:1"><div style="font-weight:700;font-size:13px;color:var(--ink)">{{ r.label }}</div><div style="font-size:11px;color:var(--m50);margin-top:2px">{{ r.desc }}</div></div>
+                  <button onClick="{{ r.toggle }}" style="border:none;flex:none;width:44px;height:26px;border-radius:20px;background:{{ r.track }};position:relative;transition:background .2s"><span style="position:absolute;top:2px;left:{{ r.knob }};width:22px;height:22px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s"></span></button>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isAjSub }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#26221d;color:#faf7f2;border-radius:22px;padding:22px;margin-bottom:18px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:20px">⭐</span><span style="font-weight:800;font-size:18px">Equus Lab Premium</span></div>
+              <sc-if value="{{ subActiva }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:rgba(250,247,242,.6);margin-bottom:16px">{{ planNote }}</div></sc-if>
+              <sc-if value="{{ subGratis }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:rgba(250,247,242,.6);margin-bottom:16px">Estás en el <b>plan gratuito</b>: análisis en tu móvil, clips cortos y 2 al día. Mejora para desbloquear todo.</div></sc-if>
+              <sc-if value="{{ subActiva }}" hint-placeholder-val="{{ true }}">
+              <div style="background:rgba(255,255,255,.07);border-radius:14px;padding:13px 14px;margin-bottom:16px">
+                <div style="display:flex;align-items:baseline;margin-bottom:8px"><span style="font-weight:800;font-size:12px">Uso de este mes</span><span style="margin-left:auto;font-weight:700;font-size:12px;color:{{ usoColor }}">{{ usoMin }} / {{ usoTotal }} min</span></div>
+                <div style="height:8px;background:rgba(255,255,255,.14);border-radius:5px;overflow:hidden"><div style="width:{{ usoPct }};height:100%;background:{{ usoColor }};border-radius:5px"></div></div>
+                <div style="font-size:11px;color:rgba(250,247,242,.55);margin-top:8px;line-height:1.4">{{ usoMsg }}</div>
+              </div>
+              <sc-if value="{{ usoAviso }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ buyPack }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:12px;padding:12px;font-size:12.5px;font-weight:800;margin-bottom:16px">Comprar pack +100 min · 2,99 €</button>
+              </sc-if>
+              <sc-if value="{{ confirmCancel }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:#e79877;margin-bottom:16px">Confirma abajo para cancelar tu Premium.</div></sc-if>
+              </sc-if>
+              <div style="display:flex;flex-direction:column;gap:9px;font-size:12.5px">
+                <div style="display:flex;gap:9px"><span style="color:var(--accent)">✓</span><span>Simulacros de concurso con juez IA</span></div>
+                <div style="display:flex;gap:9px"><span style="color:var(--accent)">✓</span><span>Comparación con referencias y biomecánica</span></div>
+                <div style="display:flex;gap:9px"><span style="color:var(--accent)">✓</span><span>Chat ilimitado y caballos ilimitados</span></div>
+              </div>
+            </div>
+            <div style="font-weight:800;font-size:13.5px;margin:0 0 11px;padding:0 2px">Elige tu plan</div>
+            <div style="display:flex;gap:6px;background:var(--tint);border-radius:14px;padding:4px;margin-bottom:14px">
+              <button onClick="{{ setMensual }}" style="flex:1;border:none;border-radius:11px;padding:10px;font-size:12.5px;font-weight:{{ cicloMensualW }};background:{{ cicloMensualBg }};color:{{ cicloMensualFg }};box-shadow:{{ cicloMensualSh }}">Mensual</button>
+              <button onClick="{{ setAnual }}" style="flex:1;border:none;border-radius:11px;padding:10px;font-size:12.5px;font-weight:{{ cicloAnualW }};background:{{ cicloAnualBg }};color:{{ cicloAnualFg }};box-shadow:{{ cicloAnualSh }};display:flex;align-items:center;justify-content:center;gap:6px">Anual <span style="background:var(--accent);color:#fff;font-weight:800;font-size:9px;border-radius:20px;padding:2px 7px">−20%</span></button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px">
+              <sc-for list="{{ planes }}" as="pl" hint-placeholder-count="3">
+                <button onClick="{{ pl.pick }}" style="text-align:left;border:{{ pl.border }};background:{{ pl.bg }};border-radius:18px;padding:15px 16px;display:flex;align-items:center;gap:13px;position:relative">
+                  <div style="flex:1">
+                    <div style="display:flex;align-items:center;gap:8px"><span style="font-weight:800;font-size:14.5px;color:{{ pl.fg }}">{{ pl.name }}</span><sc-if value="{{ pl.badge }}" hint-placeholder-val="{{ false }}"><span style="background:var(--accent);color:#fff;font-weight:800;font-size:9px;border-radius:20px;padding:3px 8px;letter-spacing:.04em">{{ pl.badge }}</span></sc-if></div>
+                    <div style="font-size:11.5px;color:{{ pl.sub }};margin-top:3px">{{ pl.min }} min/mes · vídeos hasta {{ pl.max }} min</div>
+                    <sc-if value="{{ pl.ahorro }}" hint-placeholder-val="{{ false }}"><div style="font-size:10.5px;color:{{ pl.saveFg }};margin-top:4px;font-weight:700">{{ pl.ahorro }}</div></sc-if>
+                  </div>
+                  <div style="text-align:right"><div style="font-weight:800;font-size:16px;color:{{ pl.fg }}">{{ pl.price }}</div><div style="font-size:10px;color:{{ pl.sub }}">{{ pl.per }}</div></div>
+                </button>
+              </sc-for>
+            </div>
+            <sc-if value="{{ subGratis }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ subscribe }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:16px;font-size:14px;font-weight:800;margin-bottom:8px">Suscribirme a {{ selPlanName }} · {{ selPlanPrice }} {{ selPlanPer }}</button>
+              <div style="text-align:center;font-size:11px;color:var(--m50);line-height:1.4;margin-bottom:6px">Se cobra vía App Store / Google Play. Puedes cancelar cuando quieras.</div>
+            </sc-if>
+            <sc-if value="{{ subActiva }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:16px;padding:0 4px"><span style="font-weight:800;font-size:26px">{{ planPrice }}</span><span style="font-size:12px;color:var(--m50)">{{ planPer }}</span></div>
+              <button onClick="{{ togglePlan }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:15px;font-size:13.5px;font-weight:800;margin-bottom:10px">{{ planBtnLabel }}</button>
+              <sc-if value="{{ confirmCancel }}" hint-placeholder-val="{{ false }}">
+                <div style="background:#f7ece7;border-radius:14px;padding:14px 15px;margin-top:6px">
+                  <div style="font-size:12.5px;line-height:1.45;color:var(--ink);margin-bottom:12px">¿Seguro que quieres cancelar? Perderás los análisis ilimitados y el juez IA al final del periodo.</div>
+                  <div style="display:flex;gap:9px">
+                    <button onClick="{{ dismissCancel }}" style="flex:1;border:1px solid rgba(0,0,0,.12);background:var(--surface);color:var(--ink);border-radius:12px;padding:12px;font-size:12.5px;font-weight:700">Seguir Premium</button>
+                    <button onClick="{{ doCancel }}" style="flex:1;border:none;background:#c0473a;color:#fff;border-radius:12px;padding:12px;font-size:12.5px;font-weight:700">Sí, cancelar</button>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ notConfirming }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ askCancel }}" style="width:100%;border:none;background:none;color:var(--m40);font-size:12.5px;font-weight:600;padding:8px">Cancelar suscripción</button>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ subCancelada }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#f7ece7;border-radius:16px;padding:16px 17px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start"><span style="font-size:20px">ℹ️</span><div style="font-size:12.5px;line-height:1.5;color:var(--ink)">Suscripción <b>cancelada</b>. Mantienes Premium hasta el <b>12 ago 2026</b>; después pasarás al plan gratuito.</div></div>
+              <button onClick="{{ reactivar }}" style="width:100%;border:none;background:var(--accent);color:#fff;border-radius:16px;padding:15px;font-size:13.5px;font-weight:800">Reactivar Premium</button>
+            </sc-if>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ===== BOTTOM NAV ===== -->
+      <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;padding:10px 20px 26px;background:var(--nav);justify-content:space-between;align-items:center;border-top:1px solid rgba(0,0,0,.04)">
+          <button onClick="{{ goHome }}" style="border:none;background:none;font-size:10.5px;font-weight:{{ navHomeW }};color:{{ navHome }}">{{ navL0 }}</button>
+          <button onClick="{{ goProgreso }}" style="border:none;background:none;font-size:10.5px;font-weight:{{ navProgW }};color:{{ navProg }}">{{ navL1 }}</button>
+          <button onClick="{{ goSubir }}" style="border:none;width:46px;height:46px;border-radius:50%;background:var(--accent);color:#fff;font-size:22px;margin-top:-18px;box-shadow:0 6px 16px -2px var(--accent)">＋</button>
+          <button onClick="{{ goConcursos }}" style="border:none;background:none;font-size:10.5px;font-weight:{{ navConcW }};color:{{ navConc }}">{{ navL2 }}</button>
+          <button onClick="{{ goPerfil }}" style="border:none;background:none;font-size:10.5px;font-weight:{{ navPerfilW }};color:{{ navPerfil }}">{{ navL3 }}</button>
+        </div>
+      </sc-if>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:480,&quot;height&quot;:900},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#c05f3a&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#c05f3a&quot;,&quot;#5a7048&quot;,&quot;#3a6ea5&quot;,&quot;#8a5a9b&quot;],&quot;section&quot;:&quot;Marca&quot;},&quot;rider&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Amal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenido&quot;},&quot;tone&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Técnico&quot;,&quot;options&quot;:[&quot;Cercano&quot;,&quot;Técnico&quot;,&quot;Exigente&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Entrenador IA&quot;}}">
+class Component extends DCLogic {
+  state = { screen:'welcome', theme:'light', lang:'es', confirmDelAcc:false, editId:null, authName:'', authEmail:'', authPass:'', authSent:false,
+    progress:0, playing:false, caballo:'Ondina', disciplina:'Doma clásica',
+    foco:'Todo el conjunto', concDisc:'Doma clásica', prevScreen:'home', ver:null, toneSel:null,
+    ajuste:null, nivel:'Medio', plan:'mensual', subEstado:'activa', confirmCancel:false,
+    disc:{ 'Doma clásica':true, 'Salto':true, 'Completo':false, 'Doma vaquera':false },
+    discCustom:[],
+    riderName:null, riderEdad:'28', riderAnios:'9',
+    nc:{ nombre:'', edad:'', tipo:'Yegua', raza:'', disc:'Doma clásica', alzada:'', nivel:'' },
+    pf:{ nombre:'', edad:'', anios:'' },
+    notif:{ analisis:true, retos:true, concursos:false, marketing:false },
+    caballos:[
+      { id:1, nombre:'Ondina', info:'Yegua PRE · 8 años · doma clásica', nota:'7,4', ses:'15 sesiones', accent:true, tipo:'Yegua' },
+      { id:2, nombre:'Trueno', info:'Castrado KWPN · 6 años · salto', nota:'6,9', ses:'9 sesiones', accent:false, tipo:'Castrado' }
+    ], nextId:3,
+    hasVideo:false, videoName:'', chatInput:'', messages:[], replyIdx:0,
+    isPremium:false, analisisHoy:1, chatHoy:0, usoMin:180, usoTotal:300, planTier:'premium', ciclo:'mensual' };
+
+  pickTier = (id, min) => this.setState({ planTier:id, usoTotal:min });
+
+  buyPack = () => this.setState(st => ({ usoTotal: st.usoTotal + 100 }));
+
+  onFile = (e) => { const f = e.target.files && e.target.files[0]; if(f) this.setState({ hasVideo:true, videoName:f.name }); };
+
+  T = {
+    es:{ tagline:'Tu entrenador de equitación con IA', crear:'Crear cuenta', entrar:'Iniciar sesión', demo:'Entrar en modo demo',
+      nombre:'Nombre', email:'Correo electrónico', pass:'Contraseña', olvidar:'¿Olvidaste tu contraseña?',
+      recuperar:'Recuperar contraseña', enviar:'Enviar enlace', enviado:'Te hemos enviado un enlace para restablecer tu contraseña.',
+      volver:'Volver a iniciar sesión', app:'Aplicación', idioma:'Idioma', oscuro:'Modo oscuro', oscuroD:'Fondo oscuro para entrenar de noche',
+      idiomaD:'Idioma de la app', elimCuenta:'Eliminar cuenta', elimCuentaD:'Borra tu cuenta y todos tus datos de forma permanente',
+      confirmar:'Sí, eliminar cuenta', cancelar:'Cancelar', nav:['Inicio','Progreso','Concursos','Perfil'], sinCuenta:'¿No tienes cuenta?', yaCuenta:'¿Ya tienes cuenta?' },
+    en:{ tagline:'Your AI riding coach', crear:'Create account', entrar:'Log in', demo:'Enter demo mode',
+      nombre:'Name', email:'Email', pass:'Password', olvidar:'Forgot your password?',
+      recuperar:'Reset password', enviar:'Send link', enviado:'We sent you a link to reset your password.',
+      volver:'Back to log in', app:'App', idioma:'Language', oscuro:'Dark mode', oscuroD:'Dark background for night training',
+      idiomaD:'App language', elimCuenta:'Delete account', elimCuentaD:'Permanently deletes your account and all your data',
+      confirmar:'Yes, delete account', cancelar:'Cancel', nav:['Home','Progress','Shows','Profile'], sinCuenta:"No account yet?", yaCuenta:'Already have an account?' }
+  };
+
+  login = () => this.setState({ screen:'home', authPass:'', authSent:false });
+  demo = () => this.setState({ screen:'home', riderName:'Demo', authPass:'', authSent:false });
+  sendReset = () => this.setState({ authSent:true });
+  toggleTheme = () => this.setState(st => ({ theme:st.theme==='dark'?'light':'dark' }));
+  setLang = (l) => this.setState({ lang:l });
+  delAccount = () => this.setState({ confirmDelAcc:false, screen:'welcome', riderName:null, authName:'', authEmail:'', authPass:'' });
+
+  openNuevoCaballo = () => this.setState({ editId:null, nc:{ nombre:'', edad:'', tipo:'Yegua', raza:'', disc:'Doma clásica', alzada:'', nivel:'' }, screen:'nuevoCaballo' });
+  openEditarCaballo = (c) => this.setState({ editId:c.id, nc:{ nombre:c.nombre, edad:c.edad||'', tipo:c.tipo||'Yegua', raza:c.raza||'', disc:c.disc||'Doma clásica', alzada:c.alzada||'', nivel:c.nivel||'' }, screen:'nuevoCaballo' });
+  setNc = (k,v) => this.setState(st => ({ nc:{ ...st.nc, [k]:v } }));
+  saveCaballo = () => this.setState(st => {
+    const n = st.nc;
+    const nombre = (n.nombre||'').trim() || 'Nuevo caballo';
+    const tr = (n.raza||'').trim();
+    const parts = [tr?n.tipo+' '+tr:n.tipo, n.edad?n.edad+' años':null, n.disc, n.alzada?n.alzada+' cm':null, n.nivel?'nivel '+n.nivel.toLowerCase():null].filter(Boolean);
+    const info = parts.join(' · ');
+    if(st.editId!=null){
+      return { caballos:st.caballos.map(c=> c.id===st.editId ? { ...c, nombre, info, edad:n.edad, tipo:n.tipo, raza:n.raza, disc:n.disc, alzada:n.alzada, nivel:n.nivel } : c), editId:null, screen:'perfil' };
+    }
+    return {
+      caballos:[...st.caballos, { id:st.nextId, nombre, info, nota:'—', ses:'0 sesiones', accent:false, edad:n.edad, tipo:n.tipo, raza:n.raza, disc:n.disc, alzada:n.alzada, nivel:n.nivel }],
+      nextId:st.nextId+1, screen:'perfil'
+    };
+  });
+  openEditarPerfil = () => this.setState(st => ({ pf:{ nombre:(st.riderName||this.props.rider||'Laura'), edad:st.riderEdad, anios:st.riderAnios }, screen:'editarPerfil' }));
+  setPf = (k,v) => this.setState(st => ({ pf:{ ...st.pf, [k]:v } }));
+  savePerfil = () => this.setState(st => ({ riderName:(st.pf.nombre||'').trim()||st.riderName, riderEdad:st.pf.edad, riderAnios:st.pf.anios, screen:'perfil' }));
+  delCaballo = (id) => this.setState(st => ({ caballos:st.caballos.filter(c=>c.id!==id) }));
+  toggleNotif = (k) => this.setState(st => ({ notif:{ ...st.notif, [k]:!st.notif[k] } }));
+  addDisciplina = () => this.setState(st => {
+    const nombre = st.discCustom.length ? 'Otra '+(st.discCustom.length+1) : 'Otra';
+    return { discCustom:[...st.discCustom, nombre], disciplina:nombre, foco:'Todo el conjunto' };
+  });
+
+  effTone(){ return this.state.toneSel || this.props.tone || 'Cercano'; }
+
+  componentWillUnmount(){ clearInterval(this._t); }
+
+  go = (s) => this.setState({ screen:s });
+
+  startAnalysis = () => {
+    this.setState({ screen:'procesando', progress:0 });
+    clearInterval(this._t);
+    this._t = setInterval(() => {
+      this.setState(st => {
+        const p = Math.min(100, st.progress + (Math.random()*7 + 4));
+        if (p >= 100){ clearInterval(this._t); setTimeout(()=>this.setState({screen:'resultado'}), 480); }
+        return { progress:p };
+      });
+    }, 150);
+  };
+
+  seek = () => this.setState({ playing:true });
+
+  sendChat = () => {
+    const txt = (this.state.chatInput||'').trim();
+    if(!txt) return;
+    if(!this.state.isPremium && this.state.chatHoy >= 3){
+      this.setState(st => ({ messages:[...st.messages, { role:'coach', text:'Has usado tus 3 preguntas de hoy en el plan gratis. Pásate a Premium para chatear sin límite con tu entrenador. 🐴' }], chatInput:'' }));
+      return;
+    }
+    if(!this.state.isPremium) this.setState(st => ({ chatHoy: st.chatHoy + 1 }));
+    const replies = [
+      'Para bajar el talón, piensa en estirar la pierna hacia el suelo desde la cadera, no en empujar el estribo. El peso cae solo y ganas base.',
+      'Baja las manos hasta sentir una línea recta codo–mano–boca. Cede un instante y vuelve al contacto: Ondina buscará el bocado hacia abajo.',
+      'La rectitud se corrige con la pierna interior hacia la mano exterior. En la diagonal, sostén la grupa con tu pierna derecha.',
+      'Buena pregunta. Empieza por 4 transiciones trote–paso por vuelta; cuando las hagas limpias, acórtalas a cada 8 trancos para reunir de verdad.',
+      'La flexión del corvejón mejora con trabajo en dos pistas suave. No fuerces la reunión: viene del impulso hacia una mano que cede.'
+    ];
+    const i = this.state.replyIdx % replies.length;
+    const userMsg = { role:'user', text:txt };
+    const coachMsg = { role:'coach', text: replies[i] };
+    this.setState({ messages:[...this.state.messages, userMsg], chatInput:'', replyIdx:this.state.replyIdx+1 });
+    setTimeout(()=> this.setState(st => ({ messages:[...st.messages, coachMsg] })), 520);
+  };
+
+  onChatKey = (e) => { if(e.key === 'Enter'){ e.preventDefault(); this.sendChat(); } };
+
+  askPreset = (txt) => { this.setState({ chatInput:txt }, () => this.sendChat()); };
+
+  toneMsg(){
+    const t = this.effTone();
+    if(t === 'Técnico') return '7,4. Penalizan asiento inestable y manos +6 cm. Corrige base y contacto para pasar de 8.';
+    if(t === 'Exigente') return '7,4 es justo. Con ese talón y esas manos no hay reunión real. A trabajar en serio.';
+    return 'Vas por buen camino. Si bajas los talones y las manos, subes fácil a un 8. ¡Sigue así! 💪';
+  }
+  greeting(){
+    const t = this.props.tone || 'Cercano';
+    if(t === 'Técnico') return 'Sesión analizada. 3 incidencias: talón +11°, manos +6 cm y grupa desviada 8°. ¿Por dónde empezamos?';
+    if(t === 'Exigente') return 'He visto tu monta. Hay que apretar: talón, manos y rectitud. Pregúntame lo que necesites y sin excusas.';
+    return '¡Hola '+(this.props.rider||'Laura')+'! He revisado tu trote reunido con Ondina. ¿Quieres que te explique cómo bajar los talones? 🐴';
+  }
+
+  componentDidMount(){
+    if(this.state.messages.length === 0)
+      this.setState({ messages:[{ role:'coach', text:this.greeting() }] });
+  }
+
+  chip(active){ return active
+    ? { bg:'var(--accent)', fg:'#fff' }
+    : { bg:'#fff', fg:'#3a342d' }; }
+
+  renderVals(){
+    const s = this.state.screen;
+    const accent = this.props.accent ?? '#c05f3a';
+    const rider = this.state.riderName || this.props.rider || 'Laura';
+    const tone = this.effTone();
+    const toneOpts = ['Cercano','Técnico','Exigente'].map(label=>{
+      const on = tone===label;
+      return { label, pick:()=>this.setState({toneSel:label}),
+        bg: on?'var(--accent)':'#fff', fg: on?'#fff':'#3a342d',
+        border: on?'none':'1px solid rgba(0,0,0,.08)', weight: on?700:500 };
+    });
+    const p = Math.round(this.state.progress);
+    const t = this.T[this.state.lang];
+
+    const stepState = (i) => {
+      const th = [30, 60, 90][i];
+      if(this.state.progress >= th) return 'done';
+      if(i===0 || this.state.progress >= [0,30,60,90][i]) return 'active';
+      return 'todo';
+    };
+    const labels = ['Detectando jinete y caballo','Midiendo asiento y ángulos','Analizando biomecánica','Redactando tus correcciones'];
+    const steps = labels.map((label,i) => {
+      const st = stepState(i);
+      return {
+        label,
+        mark: st==='done' ? '✓' : '',
+        bg: st==='done' ? 'var(--accent)' : 'transparent',
+        border: st==='done' ? 'none' : (st==='active' ? '2px solid #e79877' : '2px solid rgba(255,255,255,.15)'),
+        color: st==='todo' ? 'rgba(250,247,242,.45)' : '#faf7f2',
+        weight: st==='active' ? 700 : 500
+      };
+    });
+
+    const cD = this.chip(this.state.disciplina==='Doma clásica');
+    const cS = this.chip(this.state.disciplina==='Salto');
+    const cC = this.chip(this.state.disciplina==='Completo');
+    const bd = (on)=> on?'none':'1px solid rgba(0,0,0,.08)';
+    const bw = (on)=> on?700:500;
+
+    const focoOpts = this.state.disciplina==='Salto'
+      ? ['Todo el conjunto','Aproximación','Batida','Vuelo','Recepción','Pie a tierra']
+      : ['Todo el conjunto','Asiento','Contacto','Reunión','Transiciones','Pie a tierra'];
+    const focos = focoOpts.map(label => {
+      const on = this.state.foco===label;
+      return { label, pick:()=>this.setState({foco:label}),
+        bg: on ? 'var(--accent)' : '#fff', fg: on ? '#fff' : '#3a342d',
+        border: on ? 'none' : '1px solid rgba(0,0,0,.08)', weight: on ? 700 : 500 };
+    });
+
+    const tips = [
+      { time:'0:12', text:'Sube un poco menos los talones — apoya el peso en el estribo y ganarás una base firme.', seek:this.seek },
+      { time:'0:34', text:'Baja las manos para recuperar la línea codo–boca; '+this.state.caballo+' irá más redonda.', seek:this.seek },
+      { time:'1:05', text:'En la diagonal, endereza las ancas: activa el corvejón con transiciones cortas.', seek:this.seek }
+    ];
+
+    const messages = this.state.messages.map(m => m.role==='coach'
+      ? { text:m.text, align:'flex-start', bg:'#fff', fg:'#26221d', radius:'4px 16px 16px 16px' }
+      : { text:m.text, align:'flex-end', bg:accent, fg:'#fff', radius:'16px 16px 4px 16px' });
+
+    const navCol = (on) => on ? accent : 'var(--m40)';
+    const navW = (on) => on ? 800 : 600;
+
+    return {
+      accent, rider, tone, toneOpts, t, theme:this.state.theme, lang:this.state.lang,
+      isWelcome:s==='welcome', isLogin:s==='login', isRegister:s==='register', isForgot:s==='forgot', isApp:s==='app',
+      login:this.login, demo:this.demo, sendReset:this.sendReset, authSent:this.state.authSent, notSent:!this.state.authSent,
+      goWelcome:()=>this.go('welcome'), goLogin:()=>this.go('login'), goRegister:()=>this.go('register'), goForgot:()=>this.go('forgot'), goApp:()=>this.go('app'),
+      authName:this.state.authName, authEmail:this.state.authEmail, authPass:this.state.authPass,
+      onAuthName:(e)=>this.setState({authName:e.target.value}), onAuthEmail:(e)=>this.setState({authEmail:e.target.value}), onAuthPass:(e)=>this.setState({authPass:e.target.value}),
+      themeOn:this.state.theme==='dark', themeTrack:this.state.theme==='dark'?'var(--accent)':'rgba(128,128,128,.4)', themeKnob:this.state.theme==='dark'?'22px':'2px', toggleTheme:this.toggleTheme,
+      langOpts:['es','en'].map(l=>{ const on=this.state.lang===l; return { label:l==='es'?'Español':'English', pick:()=>this.setLang(l), bg:on?'var(--accent)':'var(--surface)', fg:on?'#fff':'var(--ink)', border:on?'none':'1px solid rgba(0,0,0,.08)', weight:on?700:500 }; }),
+      confirmDelAcc:this.state.confirmDelAcc, notDelAcc:!this.state.confirmDelAcc,
+      askDelAccount:()=>this.setState({confirmDelAcc:true}), dismissDelAccount:()=>this.setState({confirmDelAcc:false}), delAccount:this.delAccount,
+      navL0:t.nav[0], navL1:t.nav[1], navL2:t.nav[2], navL3:t.nav[3],
+      langLabel:this.state.lang==='es'?'Español':'English',
+      idiomaWord:this.state.lang==='es'?'Idioma':'Language',
+      logros:[
+        { icon:'🔥', name:'Racha x5', bg:'#f5e7de', fg:'#8a4a2c', op:'1' },
+        { icon:'🎯', name:'Primer 8', bg:'#eef1ea', fg:'#5a7048', op:'1' },
+        { icon:'⚖️', name:'3 concursos', bg:'#eef1ea', fg:'#5a7048', op:'1' },
+        { icon:'🏆', name:'Nivel avanzado', bg:'#f1ede6', fg:'var(--m40)', op:'.5' }
+      ],
+      isHome:s==='home', isSubir:s==='subir', isProc:s==='procesando', isResultado:s==='resultado',
+      isComparacion:s==='comparacion', isChat:s==='chat', isProgreso:s==='progreso', isPerfil:s==='perfil',
+      isConcursos:s==='concursos',
+      topColor: s==='procesando' ? '#faf7f2' : '#26221d',
+      showNav: ['home','subir','progreso','perfil','concursos'].includes(s),
+
+      goHome:()=>this.go('home'), goSubir:()=>this.go('subir'), goResultado:()=>this.go('resultado'),
+      goComparacion:()=>this.go('comparacion'),
+      goChat:()=>this.setState(st=>({ prevScreen:(st.screen==='chat'?st.prevScreen:st.screen), screen:'chat' })),
+      backFromChat:()=>this.go(this.state.prevScreen||'home'),
+      goProgreso:()=>this.go('progreso'), goPerfil:()=>this.go('perfil'), goConcursos:()=>this.go('concursos'),
+      startAnalysis:this.startAnalysis, startConcurso:()=>this.go('subir'),
+      greetTime: (()=>{ const h=new Date().getHours(); return h<6?'Buenas noches':h<13?'Buenos días':h<20?'Buenas tardes':'Buenas noches'; })(),
+      isPremium:this.state.isPremium, notPremium:!this.state.isPremium,
+      analisisLeft: Math.max(0, 2 - this.state.analisisHoy), chatLeft: Math.max(0, 3 - this.state.chatHoy),
+      disciplinas: ['Doma clásica','Salto','Completo','Doma vaquera','Otra'].map(label=>{
+        const on=this.state.concDisc===label;
+        return { label, pick:()=>this.setState({concDisc:label}),
+          bg: on?'var(--accent)':'#fff', fg: on?'#fff':'#3a342d',
+          border: on?'none':'1px solid rgba(0,0,0,.08)', weight: on?700:500 };
+      }),
+      concCount:'3 pruebas',
+      veredictos: [
+        { icon:'🎯', prueba:'Doma · San Jorge', meta:'Hoy · juez IA', pct:'68,4%', puesto:'buena', open:()=>this.setState({screen:'veredicto', ver:{prueba:'Doma clásica · San Jorge', meta:'Ondina · hoy'}}) },
+        { icon:'🚧', prueba:'Salto · 1,10 m', meta:'Ayer · 4 faltas', pct:'—', puesto:'4 pts', open:()=>this.setState({screen:'veredicto', ver:{prueba:'Salto · 1,10 m', meta:'Trueno · ayer'}}) },
+        { icon:'🤠', prueba:'Doma vaquera · nivel 3', meta:'Lun · juez IA', pct:'71,0%', puesto:'muy buena', open:()=>this.setState({screen:'veredicto', ver:{prueba:'Doma vaquera · nivel 3', meta:'Ondina · lunes'}}) }
+      ],
+      isVeredicto:s==='veredicto',
+      isAjustesMenu:s==='ajustesMenu', goAjustesMenu:()=>this.go('ajustesMenu'),
+      isAjustes:s==='ajustes', ajuste:this.state.ajuste,
+      isAjNivel:this.state.ajuste==='nivel', isAjNotif:this.state.ajuste==='notif', isAjSub:this.state.ajuste==='sub',
+      ajusteTitle: this.state.ajuste==='nivel'?'Nivel y disciplinas':this.state.ajuste==='notif'?'Notificaciones':'Suscripción',
+      openAjuste:(k)=>this.setState({ajuste:k, screen:'ajustes'}),
+      openNivel:()=>this.setState({ajuste:'nivel', screen:'ajustes'}),
+      openNotif:()=>this.setState({ajuste:'notif', screen:'ajustes'}),
+      openSub:()=>this.setState({ajuste:'sub', screen:'ajustes'}),
+      caballos:this.state.caballos.map(c=>{
+        const av = {
+          'Yegua':   { bg:'#f4e2ea', glyph:'♀', color:'#c0568a' },
+          'Semental':{ bg:'#dfe8f2', glyph:'♂', color:'#3a6ea5' },
+          'Macho':   { bg:'#dfe8f2', glyph:'♂', color:'#3a6ea5' },
+          'Castrado':{ bg:'#e6e3dd', glyph:'♆', color:'#7c766c' },
+          'Pony':    { bg:'#e2efe0', glyph:'P', color:'#5a7048' }
+        }[c.tipo] || { bg:'var(--chip)', glyph:'', color:'transparent' };
+        return { ...c, avBg:av.bg, avGlyph:av.glyph, avColor:av.color, avHasBadge:!!av.glyph,
+          del:()=>this.delCaballo(c.id), edit:()=>this.openEditarCaballo(c) };
+      }),
+      addCaballo:this.openNuevoCaballo,
+      caballoFormTitle: this.state.editId!=null ? 'Editar caballo' : 'Añadir caballo',
+      caballoFormBtn: this.state.editId!=null ? 'Guardar cambios' : 'Guardar caballo',
+      isNuevoCaballo:s==='nuevoCaballo', isEditarPerfil:s==='editarPerfil',
+      openEditarPerfil:this.openEditarPerfil, saveCaballo:this.saveCaballo, savePerfil:this.savePerfil,
+      nc:this.state.nc, pf:this.state.pf,
+      riderEdad:this.state.riderEdad, riderAnios:(this.state.riderAnios||'')+' años',
+      ncNombre:(e)=>this.setNc('nombre',e.target.value), ncEdad:(e)=>this.setNc('edad',e.target.value), ncAlzada:(e)=>this.setNc('alzada',e.target.value), ncRaza:(e)=>this.setNc('raza',e.target.value),
+      pfNombre:(e)=>this.setPf('nombre',e.target.value), pfEdad:(e)=>this.setPf('edad',e.target.value), pfAnios:(e)=>this.setPf('anios',e.target.value),
+      tipoOpts:['Yegua','Semental','Castrado','Pony'].map(label=>{
+        const on=this.state.nc.tipo===label;
+        return { label, pick:()=>this.setNc('tipo',label),
+          bg:on?'var(--accent)':'#fff', fg:on?'#fff':'#3a342d', border:on?'none':'1px solid rgba(0,0,0,.08)', weight:on?700:500 };
+      }),
+      ncDiscOpts:['Doma clásica','Salto','Completo','Doma vaquera'].map(label=>{
+        const on=this.state.nc.disc===label;
+        return { label, pick:()=>this.setNc('disc',label),
+          bg:on?'var(--accent)':'#fff', fg:on?'#fff':'#3a342d', border:on?'none':'1px solid rgba(0,0,0,.08)', weight:on?700:500 };
+      }),
+      ncNivelOpts:['Iniciado','Medio','Avanzado'].map(label=>{
+        const on=this.state.nc.nivel===label;
+        return { label, pick:()=>this.setNc('nivel', on?'':label),
+          bg:on?'var(--accent)':'#fff', fg:on?'#fff':'#3a342d', border:on?'none':'1px solid rgba(0,0,0,.08)', weight:on?700:500 };
+      }),
+      nivelOpts:['Iniciación','Medio','Avanzado'].map(label=>{
+        const on=this.state.nivel===label;
+        return { label, pick:()=>this.setState({nivel:label}),
+          bg:on?'var(--accent)':'#fff', fg:on?'#fff':'#3a342d', border:on?'none':'1px solid rgba(0,0,0,.08)', weight:on?700:500 };
+      }),
+      discRows:['Doma clásica','Salto','Completo','Doma vaquera'].map(label=>{
+        const on=this.state.disc[label];
+        return { label:on?label+' ✓':label, pick:()=>this.setState(st=>({disc:{...st.disc,[label]:!st.disc[label]}})),
+          bg:on?'var(--accent)':'#fff', fg:on?'#fff':'#3a342d',
+          border:on?'none':'1px solid rgba(0,0,0,.08)', weight:on?700:500 };
+      }),
+      cerrarSesion:()=>this.setState({screen:'home'}),
+      notifRows:[
+        { k:'analisis', label:'Análisis listo', desc:'Cuando la IA termina de corregir tu vídeo' },
+        { k:'retos', label:'Reto semanal', desc:'Tu ejercicio de la semana cada lunes' },
+        { k:'concursos', label:'Recordatorio de concursos', desc:'Antes de tus pruebas guardadas' },
+        { k:'marketing', label:'Novedades de Equus Lab', desc:'Consejos y actualizaciones de la app' }
+      ].map(r=>{
+        const on=this.state.notif[r.k];
+        return { ...r, on, toggle:()=>this.toggleNotif(r.k),
+          track:on?'var(--accent)':'rgba(0,0,0,.15)', knob:on?'22px':'2px' };
+      }),
+      nivel:this.state.nivel,
+      planAnual:this.state.plan==='anual',
+      planPrice:this.state.plan==='anual'?'95,90 €':'9,99 €',
+      planPer:this.state.plan==='anual'?'/ año':'/ mes',
+      planNote:this.state.plan==='anual'?'Plan anual · ahorras 20% (2 meses gratis)':'Plan mensual · renovación el 12 ago 2026',
+      planBtnLabel:this.state.plan==='anual'?'Volver al plan mensual':'Cambiar a plan anual · ahorra 20%',
+      togglePlan:()=>this.setState(st=>({plan:st.plan==='anual'?'mensual':'anual'})),
+      usoMin:this.state.usoMin, usoTotal:this.state.usoTotal,
+      usoPct: Math.min(100, Math.round(this.state.usoMin/this.state.usoTotal*100))+'%',
+      usoColor: this.state.usoMin/this.state.usoTotal >= 0.8 ? '#e0a04a' : 'var(--accent)',
+      usoAviso: this.state.usoMin/this.state.usoTotal >= 0.8,
+      usoMsg: this.state.usoMin/this.state.usoTotal >= 0.8
+        ? 'Estás cerca de tu cuota mensual. Compra un pack extra o espera al próximo mes — nunca te cobramos sin avisar.'
+        : 'Tu plan incluye 300 min de análisis al mes (≈15 vídeos de 20 min). Se renueva cada mes.',
+      buyPack:this.buyPack,
+      setMensual:()=>this.setState({ciclo:'mensual'}), setAnual:()=>this.setState({ciclo:'anual'}),
+      cicloMensualBg:this.state.ciclo==='mensual'?'var(--surface)':'transparent', cicloMensualFg:this.state.ciclo==='mensual'?'var(--ink)':'var(--m55)', cicloMensualW:this.state.ciclo==='mensual'?800:600, cicloMensualSh:this.state.ciclo==='mensual'?'0 1px 3px rgba(0,0,0,.1)':'none',
+      cicloAnualBg:this.state.ciclo==='anual'?'var(--surface)':'transparent', cicloAnualFg:this.state.ciclo==='anual'?'var(--ink)':'var(--m55)', cicloAnualW:this.state.ciclo==='anual'?800:600, cicloAnualSh:this.state.ciclo==='anual'?'0 1px 3px rgba(0,0,0,.1)':'none',
+      planes:(()=>{ const anual=this.state.ciclo==='anual'; return [
+        { id:'premium', name:'Premium', min:300, max:20, m:'9,99 €', a:'95,90 €', badge:'' },
+        { id:'pro', name:'Pro', min:800, max:40, m:'19,99 €', a:'191,90 €', badge:'POPULAR' },
+        { id:'elite', name:'Elite', min:2000, max:90, m:'34,99 €', a:'335,90 €', badge:'' }
+      ].map(p=>{ const on=this.state.planTier===p.id; return { ...p,
+        price:anual?p.a:p.m, per:anual?'/ año':'/ mes',
+        ahorro:anual?'Ahorras 20% · 2 meses gratis':'',
+        saveFg:on?'#e79877':'var(--accent)',
+        pick:()=>this.pickTier(p.id, p.min),
+        bg:on?'#26221d':'var(--surface)', fg:on?'#faf7f2':'var(--ink)', sub:on?'rgba(250,247,242,.6)':'var(--m55)',
+        border:on?'none':'1px solid rgba(0,0,0,.1)' }; }); })(),
+      subActiva:this.state.subEstado==='activa',
+      subGratis:this.state.subEstado==='gratis',
+      selPlanName:({premium:'Premium',pro:'Pro',elite:'Elite'})[this.state.planTier],
+      selPlanPrice:(()=>{ const a=this.state.ciclo==='anual'; const m={premium:'9,99 €',pro:'19,99 €',elite:'34,99 €'}; const y={premium:'95,90 €',pro:'191,90 €',elite:'335,90 €'}; return (a?y:m)[this.state.planTier]; })(),
+      selPlanPer:this.state.ciclo==='anual'?'/ año':'/ mes',
+      subscribe:()=>this.setState({ subEstado:'activa', isPremium:true, usoMin:0 }),
+      subCancelada:this.state.subEstado==='cancelada',
+      notConfirming:!this.state.confirmCancel,
+      confirmCancel:this.state.confirmCancel,
+      askCancel:()=>this.setState({confirmCancel:true}),
+      dismissCancel:()=>this.setState({confirmCancel:false}),
+      doCancel:()=>this.setState({subEstado:'cancelada', confirmCancel:false}),
+      reactivar:()=>this.setState({subEstado:'activa'}),
+      verTitle:(this.state.ver&&this.state.ver.prueba)||'Doma clásica · San Jorge',
+      verMeta:(this.state.ver&&this.state.ver.meta)||'Ondina · hoy',
+      sheetRows:[
+        { n:'1', mov:'Entrada al paso · parada · saludo', nota:'7,0', coef:'×1', notaColor:'#5a7048' },
+        { n:'8', mov:'Hombro adentro a la derecha', nota:'6,5', coef:'×1', notaColor:'#26221d' },
+        { n:'12', mov:'Medio paso al galope, apoyos', nota:'6,0', coef:'×2', notaColor:accent },
+        { n:'17', mov:'Cambios de pie cada 4 trancos', nota:'7,0', coef:'×1', notaColor:'#5a7048' },
+        { n:'20', mov:'Transición passage–piaffe', nota:'6,5', coef:'×1', notaColor:'#26221d' }
+      ],
+      colectivas:[
+        { k:'Aires', v:'7,0', notaColor:'#5a7048' }, { k:'Impulsión', v:'6,5', notaColor:'#26221d' },
+        { k:'Sumisión', v:'6,5', notaColor:'#26221d' }, { k:'Posición y asiento del jinete', v:'6,0', notaColor:accent }
+      ],
+      navConc: navCol(s==='concursos'), navConcW: navW(s==='concursos'),
+
+      caballo:this.state.caballo, ejercicio:'Trote reunido',
+      focoLabel: this.state.foco==='Todo el conjunto' ? 'sesión completa' : 'foco: '+this.state.foco.toLowerCase(),
+      videoLabel: this.state.hasVideo ? (this.state.videoName||'vídeo')+' ✓' : 'Sube tu vídeo',
+      onFile:this.onFile,
+      caballosPick:this.state.caballos.map(c=>{
+        const on=this.state.caballo===c.nombre;
+        return { nombre:c.nombre, pick:()=>this.setState({caballo:c.nombre}),
+          bg:on?'var(--accent)':'#fff', fg:on?'#fff':'#3a342d',
+          border:on?'none':'1px solid rgba(0,0,0,.08)', weight:on?700:500 };
+      }),
+      focos,
+      discPick: ['Doma clásica','Salto','Completo','Doma vaquera'].concat(this.state.discCustom).map(label=>{
+        const on=this.state.disciplina===label;
+        return { label, pick:()=>this.setState({disciplina:label, foco:'Todo el conjunto'}),
+          bg:on?'var(--accent)':'#fff', fg:on?'#fff':'#3a342d',
+          border:on?'none':'1px solid rgba(0,0,0,.08)', weight:on?700:500 };
+      }),
+      addDisciplina: this.addDisciplina,
+
+      pct:p, ringBg:`conic-gradient(${accent} 0 ${p}%, rgba(255,255,255,.12) ${p}% 100%)`, steps,
+      pointCount: Math.round(p/100*17), strideCount: Math.round(p/100*126),
+
+      resultTitle: this.state.disciplina==='Salto' ? 'Gimnasia de salto' : 'Trote reunido',
+      subscores:[
+        { label:'Asiento', val:'6,8', color:'#26221d' },
+        { label:'Contacto', val:'7,1', color:'#26221d' },
+        { label:'Rectitud', val:'5,9', color:accent }
+      ],
+      scoreMsg:this.toneMsg(),
+      videoStamp: this.state.playing ? '▶ reproduciendo…' : 'frame del vídeo',
+      playIcon: this.state.playing ? '❚❚' : '▶',
+      togglePlay:()=>this.setState(st=>({playing:!st.playing})),
+      tips,
+
+      messages, chatInput:this.state.chatInput,
+      onChatInput:(e)=>this.setState({chatInput:e.target.value}),
+      onChatKey:this.onChatKey, sendChat:this.sendChat,
+      suggestions:[
+        { label:'¿Cómo bajo los talones?', ask:()=>this.askPreset('¿Cómo bajo los talones?') },
+        { label:'Ejercicios para reunir', ask:()=>this.askPreset('¿Qué ejercicios hago para reunir?') },
+        { label:'Corregir la rectitud', ask:()=>this.askPreset('¿Cómo corrijo la rectitud en la diagonal?') }
+      ],
+
+      skills:[
+        { label:'Asiento', val:'6,8', pct:'68%', color:'#26221d' },
+        { label:'Contacto', val:'7,1', pct:'71%', color:'#26221d' },
+        { label:'Rectitud', val:'5,9', pct:'59%', color:accent },
+        { label:'Impulsión y reunión', val:'6,4', pct:'64%', color:'#26221d' }
+      ],
+      navHome:navCol(s==='home'), navProg:navCol(s==='progreso'), navPerfil:navCol(s==='perfil'),
+      navHomeW:navW(s==='home'), navProgW:navW(s==='progreso'), navPerfilW:navW(s==='perfil')
+    };
+  }
+}
+</script>
+</body>
+</html>
