@@ -48,9 +48,11 @@ export default function ProcesandoScreen({ navigation }: Props) {
         setProgress
       );
       if (!isPremium) registerFreeAnalysis();
-      addAnalysis(result);
+      addAnalysis({ ...result, horseId: selectedHorseId ?? undefined });
       clearVideo();
-      navigation.replace('Resultado', { analysisId: result.id });
+      // Reset a Home -> Resultado: al volver atrás desde el resultado no tiene
+      // sentido reaparecer en el formulario de subida ya usado.
+      navigation.reset({ index: 1, routes: [{ name: 'Home' }, { name: 'Resultado', params: { analysisId: result.id } }] });
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

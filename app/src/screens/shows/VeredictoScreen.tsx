@@ -31,7 +31,7 @@ export default function VeredictoScreen({ navigation, route }: Props) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
       <ScreenContainer>
-        <BackHeader title={veredicto.prueba} onBack={() => navigation.navigate('Concursos')} />
+        <BackHeader title={veredicto.prueba} onBack={() => navigation.goBack()} />
 
         <View style={{ backgroundColor: '#26221d', borderRadius: radius.xxl, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 18, marginBottom: 18 }}>
           <View>

@@ -25,7 +25,6 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
   const planTier = useAppStore((s) => s.planTier);
   const ciclo = useAppStore((s) => s.ciclo);
   const setCiclo = useAppStore((s) => s.setCiclo);
-  const pickPlanTier = useAppStore((s) => s.pickPlanTier);
   const subEstado = useAppStore((s) => s.subEstado);
   const usoMin = useAppStore((s) => s.usoMin);
   const usoTotal = useAppStore((s) => s.usoTotal);
@@ -34,9 +33,16 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
   const reactivateSubscription = useAppStore((s) => s.reactivateSubscription);
   const buyExtraPack = useAppStore((s) => s.buyExtraPack);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  // Plan que el usuario está MIRANDO en esta pantalla (no el que tiene contratado).
+  // Nunca debe escribirse en el store hasta que se confirme la compra en subscribe():
+  // de lo contrario, sólo con tocar una tarjeta para comparar precios ya se
+  // desbloquearían las funciones Premium en el resto de la app sin haber pagado.
+  const [previewTier, setPreviewTier] = useState<Exclude<PlanTier, 'free'>>(planTier !== 'free' ? planTier : 'premium');
 
   const isAnual = ciclo === 'anual';
-  const selDef = planTier !== 'free' ? PLAN_DEFS[planTier] : PLAN_DEFS.premium;
+  // Mientras hay una suscripción activa, el precio grande de abajo refleja el plan
+  // REALMENTE contratado; si aún estás en gratis, refleja el plan que previsualizas.
+  const selDef = subEstado !== 'gratis' && planTier !== 'free' ? PLAN_DEFS[planTier] : PLAN_DEFS[previewTier];
   const usoPct = usoTotal > 0 ? Math.min(100, Math.round((usoMin / usoTotal) * 100)) : 0;
   const usoAviso = usoTotal > 0 && usoMin / usoTotal >= 0.8;
   const usoColor = usoAviso ? colors.warn : colors.accent;
@@ -126,12 +132,12 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
         <View style={{ gap: 10, marginBottom: 18 }}>
           {TIERS.map((id) => {
             const def = PLAN_DEFS[id];
-            const on = planTier === id;
+            const on = (subEstado !== 'gratis' ? planTier : previewTier) === id;
             const price = isAnual ? def.precioAnual : def.precioMensual;
             return (
               <Pressable
                 key={id}
-                onPress={() => pickPlanTier(id)}
+                onPress={() => setPreviewTier(id)}
                 style={{
                   borderRadius: radius.xl,
                   padding: 16,
@@ -170,7 +176,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
           <>
             <PrimaryButton
               label={t('suscribirme', { plan: selDef.nombre, precio: formatEUR(isAnual ? selDef.precioAnual : selDef.precioMensual) })}
-              onPress={subscribe}
+              onPress={() => subscribe(previewTier)}
               style={{ marginBottom: 8 }}
             />
             <Text style={{ textAlign: 'center', fontSize: 11, color: colors.m50, lineHeight: 16 }}>{t('cobroTiendaNota')}</Text>

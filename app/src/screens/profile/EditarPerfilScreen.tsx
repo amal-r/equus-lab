@@ -30,7 +30,7 @@ export default function EditarPerfilScreen({ navigation }: Props) {
 
   const save = () => {
     updateRiderProfile({ nombre: nombre.trim() || rider.nombre, edad, aniosMontando: anios, nivel });
-    navigation.navigate('Perfil');
+    navigation.goBack();
   };
 
   return (

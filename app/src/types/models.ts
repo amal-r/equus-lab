@@ -45,6 +45,7 @@ export interface AnalysisTip {
 export interface AnalysisResult {
   id: string;
   fecha: string; // ISO
+  horseId?: string;
   caballo: string;
   disciplina: Disciplina;
   foco: string;

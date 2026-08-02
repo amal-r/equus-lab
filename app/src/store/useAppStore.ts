@@ -106,9 +106,9 @@ interface AppState {
 
   toggleNotif: (k: keyof NotifPrefs) => void;
 
-  pickPlanTier: (tier: PlanTier) => void;
   setCiclo: (c: Ciclo) => void;
-  subscribe: () => void;
+  /** Confirma la compra de `tier` — solo debe llamarse tras un pago real (o su simulación explícita), nunca al limitarse a previsualizar un plan. */
+  subscribe: (tier: Exclude<PlanTier, 'free'>) => void;
   cancelSubscription: () => void;
   reactivateSubscription: () => void;
   buyExtraPack: () => void;
@@ -247,9 +247,10 @@ export const useAppStore = create<AppState>()(
         set((s) => ({
           analyses: [result, ...s.analyses],
           currentAnalysisId: result.id,
-          horses: s.horses.map((h) =>
-            h.nombre === result.caballo ? { ...h, sesiones: h.sesiones + 1, notaMedia: result.nota.toFixed(1).replace('.', ',') } : h
-          ),
+          horses: s.horses.map((h) => {
+            const matches = result.horseId ? h.id === result.horseId : h.nombre === result.caballo;
+            return matches ? { ...h, sesiones: h.sesiones + 1, notaMedia: result.nota.toFixed(1).replace('.', ',') } : h;
+          }),
         })),
       setCurrentAnalysis: (id) => set({ currentAnalysisId: id }),
       addVeredicto: (v) => set((s) => ({ veredictos: [v, ...s.veredictos] })),
@@ -258,13 +259,11 @@ export const useAppStore = create<AppState>()(
 
       toggleNotif: (k) => set((s) => ({ notif: { ...s.notif, [k]: !s.notif[k] } })),
 
-      pickPlanTier: (tier) => set({ planTier: tier }),
       setCiclo: (c) => set({ ciclo: c }),
-      subscribe: () =>
-        set((s) => {
-          const def = s.planTier !== 'free' ? PLAN_DEFS[s.planTier] : PLAN_DEFS.premium;
-          return { planTier: def.id, subEstado: 'activa', usoMin: 0, usoTotal: def.minMes };
-        }),
+      subscribe: (tier) => {
+        const def = PLAN_DEFS[tier];
+        set({ planTier: def.id, subEstado: 'activa', usoMin: 0, usoTotal: def.minMes });
+      },
       cancelSubscription: () => set({ subEstado: 'cancelada' }),
       reactivateSubscription: () => set({ subEstado: 'activa' }),
       buyExtraPack: () => set((s) => ({ usoTotal: s.usoTotal + 100 })),

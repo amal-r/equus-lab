@@ -41,7 +41,7 @@ export default function NuevoCaballoScreen({ navigation, route }: Props) {
     const payload = { nombre: nombre.trim() || 'Nuevo caballo', raza, edad, alzada, tipo, disciplina: disc, nivel };
     if (editing) updateHorse(editing.id, payload);
     else addHorse(payload);
-    navigation.navigate('Perfil');
+    navigation.goBack();
   };
 
   return (

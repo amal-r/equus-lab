@@ -52,7 +52,7 @@ export default function ResultadoScreen({ navigation, route }: Props) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
       <View style={{ paddingHorizontal: 22, paddingTop: 6, paddingBottom: 12, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <Pressable onPress={() => navigation.navigate('Home')} hitSlop={10}>
+        <Pressable onPress={() => navigation.goBack()} hitSlop={10}>
           <Text style={{ fontSize: 20, color: colors.m40 }}>‹</Text>
         </Pressable>
         <View style={{ flex: 1 }}>
