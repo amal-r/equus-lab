@@ -16,6 +16,7 @@ import {
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useAppStore } from './src/store/useAppStore';
 import { palette } from './src/theme/colors';
+import { configurePurchases } from './src/services/purchases';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -28,6 +29,11 @@ export default function App() {
   const hasHydrated = useAppStore((s) => s.hasHydrated);
   const theme = useAppStore((s) => s.theme);
   const colors = palette(theme);
+
+  React.useEffect(() => {
+    // No hace nada si no hay claves de RevenueCat configuradas (ver .env.example).
+    configurePurchases();
+  }, []);
 
   if (!fontsLoaded || !hasHydrated) {
     return (

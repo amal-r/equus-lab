@@ -4,7 +4,8 @@ import { subsDb, veredictosDb } from '../db.js';
 import { judgeShow as aiJudgeShow } from '../ai/index.js';
 
 export const showsRouter = Router();
-showsRouter.use(requireAuth);
+// Con ruta ('/shows'): ver mismo comentario en horses.js/analyses.js.
+showsRouter.use('/shows', requireAuth);
 
 showsRouter.post('/shows/judge', async (req, res) => {
   const { videoUrl, disciplina, prueba, caballo } = req.body ?? {};

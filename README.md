@@ -55,11 +55,12 @@ Copia `app/.env.example` → `app/.env`:
 |---|---|
 | Navegación, todas las pantallas, i18n ES/EN, tema claro/oscuro | ✅ Real |
 | Selección de vídeo de la galería (`expo-image-picker`), reproducción (`expo-video`) | ✅ Real |
-| Análisis on-device (plan gratis) — `src/ondevice/analyzeClip.ts` | ⚠️ Simulado (determinista, sin red). Ver [§4](#4-siguiente-iteración-mediapipe-real) |
+| Análisis on-device (plan gratis) — `src/ondevice/analyzeClip.ts` | ⚠️ Simulado (determinista, sin red). Ver [§5](#5-siguiente-iteración-mediapipe-real) |
 | Juez de concursos on-device — `src/ondevice/judgeShow.ts` | ⚠️ Simulado, mismo motivo |
 | Persistencia local (perfil, caballos, historial, tema) | ✅ Real (`AsyncStorage` vía Zustand `persist`) |
 | Token de sesión | ✅ Guardado en Keychain/Keystore (`expo-secure-store`), ver `src/services/session.ts` |
-| Login/registro/suscripción | ⚠️ Mock local en el store (`useAppStore`) hasta que conectes `EXPO_PUBLIC_API_URL` |
+| Login/registro | ⚠️ Mock local en el store (`useAppStore`) hasta que conectes `EXPO_PUBLIC_API_URL` |
+| Suscripción / compra real (StoreKit vía RevenueCat) | ✅ Real SI configuras `EXPO_PUBLIC_REVENUECAT_IOS_KEY` (ver §5). Sin ella, "Suscribirme" simula el plan localmente |
 | Análisis Premium / chat / juez IA vía backend | ✅ Real SI configuras `EXPO_PUBLIC_API_URL` y el backend tiene `GEMINI_API_KEY` |
 
 ---
@@ -94,7 +95,8 @@ curl http://localhost:8080/health
 | `GEMINI_API_KEY` | Activa el proveedor de IA real (Gemini). Vacía → usa el mock | No |
 | `GEMINI_MODEL` | Modelo a usar | No (por defecto `gemini-3.1-flash-lite`, ver `ARQUITECTURA-IA.md`) |
 | `CORS_ORIGIN` | Origen permitido para llamadas desde la app | No (por defecto `*`) |
-| `REVENUECAT_WEBHOOK_SECRET` | Para cuando conectes compras reales (fase futura) | No |
+| `REVENUECAT_SECRET_API_KEY` | Consulta el estado real de un suscriptor en RevenueCat (`/subscription/verify`) | No (sin ella, verify devuelve error en vez de activar algo sin comprobar) |
+| `REVENUECAT_WEBHOOK_SECRET` | Cabecera Authorization que verifica que un webhook viene de RevenueCat | No (ver §5) |
 
 ### Endpoints
 
@@ -105,10 +107,11 @@ POST   /api/auth/forgot-password      stub (no envía email todavía)
 DELETE /api/account                   eliminar cuenta y datos
 
 GET    /api/subscription               estado real del plan
-POST   /api/subscription/verify        activa un plan (STUB: falta validar recibo real de Apple/Google)
-POST   /api/subscription/cancel
+POST   /api/subscription/verify        confirma una compra consultando el estado REAL en RevenueCat
+POST   /api/subscription/cancel        lo llama el webhook, no la app (Apple/Google no dejan cancelar por API)
 POST   /api/subscription/reactivate
 POST   /api/subscription/buy-pack      +100 min
+POST   /api/webhooks/revenuecat        eventos de RevenueCat (renovación, cancelación, impago) — sin auth de usuario, valida la cabecera Authorization
 
 POST   /api/videos                     valida duración del clip según el plan, devuelve upload URL (STUB: falta S3/GCS real)
 POST   /api/analyses                   lanza un análisis Premium (valida cuota, llama a la IA)
@@ -129,13 +132,6 @@ Todas (salvo `/auth/*` y `/health`) requieren `Authorization: Bearer <token>`.
 es el único fichero que hay que sustituir por Postgres/Supabase. Todas sus funciones ya son
 `async`, así que las rutas no cambian.
 
-### Conectar compras reales (Apple/Google)
-
-`POST /api/subscription/verify` es un **stub**: activa el plan sin comprobar nada. Antes de
-publicar, sustitúyelo por la verificación real del recibo (App Store Server API / Play
-Developer API) o, más simple, integra el SDK de **RevenueCat** en la app y valida su webhook
-aquí (ver `ARQUITECTURA-IA.md` §7 e `IMPLEMENTACION.md` §2).
-
 ---
 
 ## 3. Activar Gemini (Premium real)
@@ -154,7 +150,56 @@ otro según si hay clave — así que cambiar a **Qwen-VL self-host** en el futu
 
 ---
 
-## 4. Siguiente iteración: MediaPipe real
+## 4. Suscripciones reales (RevenueCat)
+
+El botón "Suscribirme" ya está conectado a una compra real de App Store/Google Play vía
+**RevenueCat** (`app/src/services/purchases.ts`). Sin configurar nada, sigue funcionando en
+modo simulado (igual que Gemini): útil para probar el resto de la app sin cuentas externas.
+
+### Pasos para activarlo
+
+1. Crea una cuenta gratis en [revenuecat.com](https://www.revenuecat.com) y un proyecto.
+2. En **Products**, crea los mismos identificadores que uses en App Store Connect / Google
+   Play. Convención usada por el código (`productIdFor()` en `purchases.ts`):
+
+   ```
+   com.equuslab.app.premium.monthly   com.equuslab.app.premium.annual
+   com.equuslab.app.pro.monthly       com.equuslab.app.pro.annual
+   com.equuslab.app.elite.monthly     com.equuslab.app.elite.annual
+   ```
+3. En **Entitlements**, crea tres: `premium`, `pro`, `elite` (los nombres importan, los lee
+   `ENTITLEMENT_TO_TIER`/`ENTITLEMENT_ORDER` en `purchases.ts` y `server/src/revenuecat.js`).
+   Adjunta cada producto mensual/anual a su entitlement correspondiente.
+4. En **Offerings**, crea un offering `default` con los 6 paquetes (uno por producto).
+5. Copia las **claves públicas** (Project settings → API keys) a `app/.env`:
+   `EXPO_PUBLIC_REVENUECAT_IOS_KEY` / `EXPO_PUBLIC_REVENUECAT_ANDROID_KEY`.
+6. Copia la **clave secreta** del proyecto a `server/.env` → `REVENUECAT_SECRET_API_KEY`.
+7. En **Integrations → Webhooks**, añade `https://tu-backend/api/webhooks/revenuecat`, pon un
+   valor de cabecera Authorization a tu elección, y pon ese mismo valor en `server/.env` →
+   `REVENUECAT_WEBHOOK_SECRET`.
+
+### Una pieza que falta para que el webhook sea 100% correcto
+
+El webhook identifica al usuario por el mismo id con el que la app llamó a
+`Purchases.configure({ appUserID })`. Hoy `configurePurchases()` se llama **sin** `appUserID`
+(modo anónimo), porque el login de la app todavía es un mock local (no hay id de usuario real
+del backend disponible en el cliente — ver tabla de arriba). Esto significa:
+
+- **La compra en sí funciona perfectamente** (StoreKit/Google Play la procesan de verdad,
+  `handleSubscribe`/`handleRestore` desbloquean el plan al instante vía el propio SDK).
+- Pero el **webhook** no podrá enlazar renovaciones/cancelaciones futuras con la cuenta
+  correcta de tu backend hasta que conectes el login real (`/api/auth/login`) y pases ese
+  `user.id` como `appUserID` a `configurePurchases(user.id)` en `App.tsx`.
+
+### Restaurar compras / gestionar suscripción
+
+- "Restaurar compras" llama a `Purchases.restorePurchases()`.
+- "Cancelar suscripción" abre la pantalla nativa de gestión (Apple/Google no permiten
+  cancelar por API); el estado se actualiza solo cuando llega el webhook tras confirmar allí.
+
+---
+
+## 5. Siguiente iteración: MediaPipe real
 
 Hoy, `app/src/ondevice/analyzeClip.ts` y `judgeShow.ts` son generadores **deterministas**
 (mismo vídeo + mismos ajustes → mismo resultado) sin cámara real de landmarks, para tener el
@@ -179,6 +224,7 @@ Camino recomendado (ver `IMPLEMENTACION.md` §1 para más detalle):
   (`app/src/services/session.ts`), no en `AsyncStorage`.
 - El backend valida la suscripción y las cuotas en **cada** petición Premium — la app nunca
   decide por sí sola si algo es gratis o de pago.
-- Antes de producción: sustituir el stub de `/api/videos` por URLs firmadas reales de
-  S3/GCS con caducidad, y el stub de `/api/subscription/verify` por la validación real de
-  recibos (o RevenueCat).
+- Antes de producción: sustituir el stub de `/api/videos` por URLs firmadas reales de S3/GCS
+  con caducidad. `/api/subscription/verify` y el webhook de RevenueCat ya validan de verdad
+  (ver §4) — solo falta conectar el login real para que el webhook identifique siempre a la
+  cuenta correcta (mismo apartado).

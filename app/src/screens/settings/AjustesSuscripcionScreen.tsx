@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Pressable, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { PurchasesOffering } from 'react-native-purchases';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { BackHeader } from '../../components/BackHeader';
@@ -9,6 +10,16 @@ import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
 import { PLAN_DEFS, PlanTier } from '../../types/models';
+import {
+  HAS_REVENUECAT,
+  getOfferings,
+  openManageSubscriptions,
+  productIdFor,
+  purchase,
+  restore,
+  tierFromCustomerInfo,
+} from '../../services/purchases';
+import { notifyBackendOfPurchase } from '../../services/subscriptionService';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AjustesSuscripcion'>;
@@ -33,11 +44,21 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
   const reactivateSubscription = useAppStore((s) => s.reactivateSubscription);
   const buyExtraPack = useAppStore((s) => s.buyExtraPack);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [offering, setOffering] = useState<PurchasesOffering | null>(null);
+  const [busy, setBusy] = useState<'purchase' | 'restore' | null>(null);
   // Plan que el usuario está MIRANDO en esta pantalla (no el que tiene contratado).
   // Nunca debe escribirse en el store hasta que se confirme la compra en subscribe():
   // de lo contrario, sólo con tocar una tarjeta para comparar precios ya se
   // desbloquearían las funciones Premium en el resto de la app sin haber pagado.
   const [previewTier, setPreviewTier] = useState<Exclude<PlanTier, 'free'>>(planTier !== 'free' ? planTier : 'premium');
+
+  useEffect(() => {
+    if (HAS_REVENUECAT) {
+      getOfferings()
+        .then(setOffering)
+        .catch(() => setOffering(null));
+    }
+  }, []);
 
   const isAnual = ciclo === 'anual';
   // Mientras hay una suscripción activa, el precio grande de abajo refleja el plan
@@ -46,6 +67,82 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
   const usoPct = usoTotal > 0 ? Math.min(100, Math.round((usoMin / usoTotal) * 100)) : 0;
   const usoAviso = usoTotal > 0 && usoMin / usoTotal >= 0.8;
   const usoColor = usoAviso ? colors.warn : colors.accent;
+
+  const packageFor = (tier: Exclude<PlanTier, 'free'>, c: 'mensual' | 'anual') => {
+    if (!offering) return null;
+    const id = productIdFor(tier, c);
+    return offering.availablePackages.find((p) => p.product.identifier === id) ?? null;
+  };
+  const priceFor = (tier: Exclude<PlanTier, 'free'>, fallback: number) => {
+    const pkg = packageFor(tier, ciclo);
+    return pkg ? pkg.product.priceString : formatEUR(fallback);
+  };
+
+  const handleSubscribe = async () => {
+    if (!HAS_REVENUECAT) {
+      // Sin claves de RevenueCat configuradas: simulación local para poder
+      // demostrar el flujo (ver app/.env.example).
+      subscribe(previewTier);
+      return;
+    }
+    const pkg = packageFor(previewTier, ciclo);
+    if (!pkg) {
+      Alert.alert(
+        'Plan no disponible todavía',
+        `No encuentro el producto "${productIdFor(previewTier, ciclo)}" en el offering de RevenueCat. Comprueba que existe en App Store Connect / Google Play y que está enlazado en RevenueCat.`
+      );
+      return;
+    }
+    setBusy('purchase');
+    try {
+      const info = await purchase(pkg);
+      const ent = tierFromCustomerInfo(info);
+      if (ent) {
+        subscribe(ent.tier);
+        void notifyBackendOfPurchase(info.originalAppUserId);
+      }
+    } catch (err: any) {
+      if (!err?.userCancelled) {
+        Alert.alert('No se pudo completar la compra', err?.message ?? 'Inténtalo de nuevo en unos minutos.');
+      }
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (!HAS_REVENUECAT) {
+      Alert.alert('Sin tienda conectada', 'Esta compilación no tiene RevenueCat configurado todavía.');
+      return;
+    }
+    setBusy('restore');
+    try {
+      const info = await restore();
+      const ent = tierFromCustomerInfo(info);
+      if (ent) {
+        subscribe(ent.tier);
+        void notifyBackendOfPurchase(info.originalAppUserId);
+        Alert.alert('Compra restaurada', `Tienes ${PLAN_DEFS[ent.tier].nombre} activo.`);
+      } else {
+        Alert.alert('Nada que restaurar', 'No encontramos ninguna suscripción activa para tu cuenta de la tienda.');
+      }
+    } catch (err: any) {
+      Alert.alert('No se pudo restaurar', err?.message ?? 'Inténtalo de nuevo.');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleCancelPress = async () => {
+    if (HAS_REVENUECAT) {
+      // Apple/Google no permiten cancelar por API: abrimos la pantalla nativa de
+      // gestión de suscripciones. El estado se actualizará solo cuando llegue el
+      // webhook de RevenueCat (evento CANCELLATION) tras confirmar allí.
+      await openManageSubscriptions();
+      return;
+    }
+    setConfirmCancel(true);
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
@@ -133,7 +230,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
           {TIERS.map((id) => {
             const def = PLAN_DEFS[id];
             const on = (subEstado !== 'gratis' ? planTier : previewTier) === id;
-            const price = isAnual ? def.precioAnual : def.precioMensual;
+            const price = priceFor(id, isAnual ? def.precioAnual : def.precioMensual);
             return (
               <Pressable
                 key={id}
@@ -164,7 +261,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
                   {isAnual && <Text style={{ fontSize: 10.5, color: on ? '#e79877' : colors.accent, marginTop: 4, fontWeight: '700' }}>{t('ahorro20')}</Text>}
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ fontWeight: '800', fontSize: 16, color: on ? '#faf7f2' : colors.ink }}>{formatEUR(price)}</Text>
+                  <Text style={{ fontWeight: '800', fontSize: 16, color: on ? '#faf7f2' : colors.ink }}>{price}</Text>
                   <Text style={{ fontSize: 10, color: on ? 'rgba(250,247,242,0.6)' : colors.m55 }}>{isAnual ? '/ año' : '/ mes'}</Text>
                 </View>
               </Pressable>
@@ -175,25 +272,28 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
         {subEstado === 'gratis' && (
           <>
             <PrimaryButton
-              label={t('suscribirme', { plan: selDef.nombre, precio: formatEUR(isAnual ? selDef.precioAnual : selDef.precioMensual) })}
-              onPress={() => subscribe(previewTier)}
+              label={t('suscribirme', { plan: selDef.nombre, precio: priceFor(previewTier, isAnual ? selDef.precioAnual : selDef.precioMensual) })}
+              onPress={handleSubscribe}
+              loading={busy === 'purchase'}
               style={{ marginBottom: 8 }}
             />
-            <Text style={{ textAlign: 'center', fontSize: 11, color: colors.m50, lineHeight: 16 }}>{t('cobroTiendaNota')}</Text>
+            <Text style={{ textAlign: 'center', fontSize: 11, color: colors.m50, lineHeight: 16, marginBottom: 14 }}>{t('cobroTiendaNota')}</Text>
           </>
         )}
 
         {subEstado === 'activa' && (
           <>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
-              <Text style={{ fontWeight: '800', fontSize: 26, color: colors.ink }}>{formatEUR(isAnual ? selDef.precioAnual : selDef.precioMensual)}</Text>
+              <Text style={{ fontWeight: '800', fontSize: 26, color: colors.ink }}>{priceFor(planTier !== 'free' ? planTier : previewTier, isAnual ? selDef.precioAnual : selDef.precioMensual)}</Text>
               <Text style={{ fontSize: 12, color: colors.m50 }}>{isAnual ? '/ año' : '/ mes'}</Text>
             </View>
-            <PrimaryButton
-              label={isAnual ? t('volverMensual') : t('cambiarAnual')}
-              onPress={() => setCiclo(isAnual ? 'mensual' : 'anual')}
-              style={{ marginBottom: 10 }}
-            />
+            {!HAS_REVENUECAT && (
+              <PrimaryButton
+                label={isAnual ? t('volverMensual') : t('cambiarAnual')}
+                onPress={() => setCiclo(isAnual ? 'mensual' : 'anual')}
+                style={{ marginBottom: 10 }}
+              />
+            )}
             {confirmCancel ? (
               <View style={{ backgroundColor: '#f7ece7', borderRadius: 14, padding: 15 }}>
                 <Text style={{ fontSize: 12.5, lineHeight: 18, color: '#26221d', marginBottom: 12 }}>{t('seguroCancelar')}</Text>
@@ -211,7 +311,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
                 </View>
               </View>
             ) : (
-              <Pressable onPress={() => setConfirmCancel(true)} style={{ paddingVertical: 8, alignItems: 'center' }}>
+              <Pressable onPress={handleCancelPress} style={{ paddingVertical: 8, alignItems: 'center' }}>
                 <Text style={{ color: colors.m40, fontWeight: '600', fontSize: 12.5 }}>{t('cancelarSuscripcion')}</Text>
               </Pressable>
             )}
@@ -224,9 +324,15 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
               <Text style={{ fontSize: 20 }}>ℹ️</Text>
               <Text style={{ fontSize: 12.5, lineHeight: 18, color: '#26221d', flex: 1 }}>{t('suscripcionCancelada')}</Text>
             </View>
-            <PrimaryButton label={t('reactivarPremium')} onPress={reactivateSubscription} />
+            <PrimaryButton label={t('reactivarPremium')} onPress={reactivateSubscription} style={{ marginBottom: 14 }} />
           </>
         )}
+
+        <Pressable onPress={handleRestore} style={{ paddingVertical: 10, alignItems: 'center' }} disabled={busy === 'restore'}>
+          <Text style={{ color: colors.accent, fontWeight: '700', fontSize: 12.5 }}>
+            {busy === 'restore' ? 'Restaurando…' : 'Restaurar compras'}
+          </Text>
+        </Pressable>
       </ScreenContainer>
     </SafeAreaView>
   );

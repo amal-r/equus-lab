@@ -5,7 +5,9 @@ import { PLAN_DEFS } from '../plans.js';
 import { analyzeVideo } from '../ai/index.js';
 
 export const analysesRouter = Router();
-analysesRouter.use(requireAuth);
+// Con ruta ('/analyses'): sin ella, intercepta cualquier petición /api/* que
+// llegue a este router, no solo las suyas (ver mismo comentario en horses.js).
+analysesRouter.use('/analyses', requireAuth);
 
 function timeLabel(sec) {
   const m = Math.floor(sec / 60);

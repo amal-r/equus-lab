@@ -3,7 +3,11 @@ import { requireAuth } from '../middleware/auth.js';
 import { horsesDb } from '../db.js';
 
 export const horsesRouter = Router();
-horsesRouter.use(requireAuth);
+// Importante: con ruta ('/horses'), no en blanco. `router.use(requireAuth)` sin
+// ruta intercepta CUALQUIER petición que llegue a este router (incluidas rutas
+// de otros routers montados después en el mismo prefijo /api, como el webhook
+// de RevenueCat), no solo las de /horses.
+horsesRouter.use('/horses', requireAuth);
 
 horsesRouter.get('/horses', async (req, res) => {
   res.json(await horsesDb.list(req.user.id));

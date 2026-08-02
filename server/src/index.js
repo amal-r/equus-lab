@@ -11,6 +11,7 @@ import { analysesRouter } from './routes/analyses.js';
 import { chatRouter } from './routes/chat.js';
 import { showsRouter } from './routes/shows.js';
 import { progressRouter } from './routes/progress.js';
+import { webhooksRouter } from './routes/webhooks.js';
 import { aiProviderName } from './ai/index.js';
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api', analysesRouter);
 app.use('/api', chatRouter);
 app.use('/api', showsRouter);
 app.use('/api', progressRouter);
+app.use('/api', webhooksRouter);
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
