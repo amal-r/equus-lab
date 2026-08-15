@@ -91,8 +91,8 @@ export interface PlanDef {
 
 export const PLAN_DEFS: Record<Exclude<PlanTier, 'free'>, PlanDef> = {
   premium: { id: 'premium', nombre: 'Premium', minMes: 300, clipMaxMin: 20, precioMensual: 9.99, precioAnual: 95.9 },
-  pro: { id: 'pro', nombre: 'Pro', minMes: 800, clipMaxMin: 40, precioMensual: 19.99, precioAnual: 191.9 },
-  elite: { id: 'elite', nombre: 'Elite', minMes: 2000, clipMaxMin: 90, precioMensual: 34.99, precioAnual: 335.9 },
+  pro: { id: 'pro', nombre: 'Pro', minMes: 800, clipMaxMin: 40, precioMensual: 19.99, precioAnual: 191.99 },
+  elite: { id: 'elite', nombre: 'Elite', minMes: 2000, clipMaxMin: 90, precioMensual: 34.99, precioAnual: 339.99 },
 };
 
 export const FREE_LIMITS = {
