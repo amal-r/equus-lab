@@ -21,3 +21,13 @@ export async function notifyBackendOfPurchase(revenueCatAppUserId: string): Prom
     // no_backend o error puntual: se reconciliará con el próximo webhook/sync.
   }
 }
+
+/** Igual que notifyBackendOfPurchase, pero para el pack de +100 min (compra consumible, sin entitlement). */
+export async function notifyBackendOfExtraPack(): Promise<void> {
+  if (!HAS_BACKEND) return;
+  try {
+    await apiFetch('/api/subscription/buy-pack', { method: 'POST' });
+  } catch (err) {
+    if (!(err instanceof ApiError)) throw err;
+  }
+}

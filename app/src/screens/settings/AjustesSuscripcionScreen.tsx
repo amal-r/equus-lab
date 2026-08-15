@@ -16,10 +16,11 @@ import {
   openManageSubscriptions,
   productIdFor,
   purchase,
+  purchaseExtraPack,
   restore,
   tierFromCustomerInfo,
 } from '../../services/purchases';
-import { notifyBackendOfPurchase } from '../../services/subscriptionService';
+import { notifyBackendOfExtraPack, notifyBackendOfPurchase } from '../../services/subscriptionService';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AjustesSuscripcion'>;
@@ -45,7 +46,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
   const buyExtraPack = useAppStore((s) => s.buyExtraPack);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
-  const [busy, setBusy] = useState<'purchase' | 'restore' | null>(null);
+  const [busy, setBusy] = useState<'purchase' | 'restore' | 'pack' | null>(null);
   // Plan que el usuario está MIRANDO en esta pantalla (no el que tiene contratado).
   // Nunca debe escribirse en el store hasta que se confirme la compra en subscribe():
   // de lo contrario, sólo con tocar una tarjeta para comparar precios ya se
@@ -133,6 +134,27 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
     }
   };
 
+  const handleBuyExtraPack = async () => {
+    if (!HAS_REVENUECAT) {
+      // Sin RevenueCat configurado: simulación local, igual que el resto de compras.
+      buyExtraPack();
+      return;
+    }
+    setBusy('pack');
+    try {
+      await purchaseExtraPack();
+      buyExtraPack();
+      void notifyBackendOfExtraPack();
+      Alert.alert('Pack añadido', 'Se han sumado 100 minutos a tu cuota de este mes.');
+    } catch (err: any) {
+      if (!err?.userCancelled) {
+        Alert.alert('No se pudo completar la compra', err?.message ?? 'Inténtalo de nuevo en unos minutos.');
+      }
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const handleCancelPress = async () => {
     if (HAS_REVENUECAT) {
       // Apple/Google no permiten cancelar por API: abrimos la pantalla nativa de
@@ -179,8 +201,12 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
                 </Text>
               </View>
               {usoAviso && (
-                <Pressable onPress={buyExtraPack} style={{ backgroundColor: colors.accent, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginBottom: 16 }}>
-                  <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12.5 }}>{t('comprarPack')}</Text>
+                <Pressable
+                  onPress={handleBuyExtraPack}
+                  disabled={busy === 'pack'}
+                  style={{ backgroundColor: colors.accent, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginBottom: 16, opacity: busy === 'pack' ? 0.7 : 1 }}
+                >
+                  <Text style={{ color: '#fff', fontWeight: '800', fontSize: 12.5 }}>{busy === 'pack' ? 'Comprando…' : t('comprarPack')}</Text>
                 </Pressable>
               )}
             </>

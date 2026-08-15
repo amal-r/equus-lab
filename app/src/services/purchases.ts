@@ -86,3 +86,15 @@ export async function openManageSubscriptions(): Promise<void> {
 export function productIdFor(tier: Exclude<PlanTier, 'free'>, ciclo: 'mensual' | 'anual'): string {
   return `com.equuslab.app.${tier}.${ciclo === 'anual' ? 'annual' : 'monthly'}`;
 }
+
+/**
+ * El pack de +100 min es una compra única (consumible), no una suscripción:
+ * no forma parte de ningún Offering/Entitlement de RevenueCat, se compra
+ * directamente por su Product ID.
+ */
+export const EXTRA_PACK_PRODUCT_ID = 'com.equuslab.app.extrapack.100min';
+
+export async function purchaseExtraPack(): Promise<CustomerInfo> {
+  const { customerInfo } = await Purchases.purchaseProduct(EXTRA_PACK_PRODUCT_ID);
+  return customerInfo;
+}
