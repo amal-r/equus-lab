@@ -159,7 +159,7 @@ export const strings = {
     disciplinasQuePracticas: 'Disciplinas que practicas',
 
     equusLabPremium: 'Equus Lab Premium',
-    planGratuitoDesc: 'Estás en el plan gratuito: análisis en tu móvil, clips cortos y 2 al día. Mejora para desbloquear todo.',
+    planGratuitoDesc: 'Estás en el plan gratuito: análisis en tu móvil, clips cortos y 1 al día. Mejora para desbloquear todo.',
     usoDeEsteMes: 'Uso de este mes',
     usoAvisoMsg: 'Estás cerca de tu cuota mensual. Compra un pack extra o espera al próximo mes — nunca te cobramos sin avisar.',
     usoNormalMsg: 'Tu plan incluye {min} min de análisis al mes. Se renueva cada mes.',
@@ -329,7 +329,7 @@ export const strings = {
     disciplinasQuePracticas: 'Disciplines you practice',
 
     equusLabPremium: 'Equus Lab Premium',
-    planGratuitoDesc: "You're on the free plan: on-device analysis, short clips, 2 per day. Upgrade to unlock everything.",
+    planGratuitoDesc: "You're on the free plan: on-device analysis, short clips, 1 per day. Upgrade to unlock everything.",
     usoDeEsteMes: "This month's usage",
     usoAvisoMsg: "You're close to your monthly quota. Buy an extra pack or wait for next month — we never charge you without warning.",
     usoNormalMsg: 'Your plan includes {min} min of analysis per month. Renews every month.',

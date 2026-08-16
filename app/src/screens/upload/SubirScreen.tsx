@@ -14,12 +14,13 @@ import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
 import { DISCIPLINAS_BASE, FREE_LIMITS, PLAN_DEFS } from '../../types/models';
+import { nextDailyResetLabel } from '../../utils/resetTime';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Subir'>;
 
 export default function SubirScreen({ navigation }: Props) {
-  const { t } = useT();
+  const { t, lang } = useT();
   const { colors } = useTheme();
   const horses = useAppStore((s) => s.horses);
   const selectedHorseId = useAppStore((s) => s.selectedHorseId);
@@ -86,7 +87,7 @@ export default function SubirScreen({ navigation }: Props) {
     if (isFree && !canStartFreeAnalysis()) {
       Alert.alert(
         'Límite diario alcanzado',
-        `Has usado tus ${FREE_LIMITS.analisisPorDia} análisis gratis de hoy. Vuelve mañana o pásate a Premium.`,
+        `Has usado tu${FREE_LIMITS.analisisPorDia > 1 ? 's' : ''} ${FREE_LIMITS.analisisPorDia} análisis gratis de hoy. Se renueva ${nextDailyResetLabel(lang)}, o pásate a Premium para seguir ahora.`,
         [
           { text: 'Ahora no', style: 'cancel' },
           { text: 'Ver planes', onPress: () => navigation.navigate('AjustesSuscripcion') },

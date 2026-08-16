@@ -8,12 +8,13 @@ import { useAppStore } from '../../store/useAppStore';
 import { askCoach } from '../../services/chatService';
 import { toneGreeting } from '../../utils/coachTone';
 import { FREE_LIMITS } from '../../types/models';
+import { nextDailyResetLabel } from '../../utils/resetTime';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Chat'>;
 
 export default function ChatScreen({ navigation }: Props) {
-  const { t } = useT();
+  const { t, lang } = useT();
   const { colors } = useTheme();
   const messages = useAppStore((s) => s.messages);
   const addChatMessage = useAppStore((s) => s.addChatMessage);
@@ -45,7 +46,7 @@ export default function ChatScreen({ navigation }: Props) {
       setInput('');
       Alert.alert(
         'Límite diario alcanzado',
-        t('limiteChatGratis', { n: FREE_LIMITS.preguntasChatPorDia }),
+        `${t('limiteChatGratis', { n: FREE_LIMITS.preguntasChatPorDia })} ${lang === 'en' ? 'Resets' : 'Se renueva'} ${nextDailyResetLabel(lang)}.`,
         [
           { text: 'Ahora no', style: 'cancel' },
           { text: 'Ver planes', onPress: () => navigation.navigate('AjustesSuscripcion') },

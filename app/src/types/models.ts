@@ -102,7 +102,7 @@ export const PLAN_DEFS: Record<Exclude<PlanTier, 'free'>, PlanDef> = {
 
 export const FREE_LIMITS = {
   clipMaxMin: 3,
-  analisisPorDia: 2,
+  analisisPorDia: 1,
   preguntasChatPorDia: 3,
 };
 
