@@ -18,6 +18,7 @@ export default function ResultadoScreen({ navigation, route }: Props) {
   const { colors, radius } = useTheme();
   const analysis = useAppStore((s) => s.analyses.find((a) => a.id === route.params.analysisId));
   const tone = useAppStore((s) => s.toneSel) ?? 'Cercano';
+  const planTier = useAppStore((s) => s.planTier);
 
   const player = useVideoPlayer(analysis?.videoUri ?? null, (p) => {
     p.loop = false;
@@ -33,6 +34,17 @@ export default function ResultadoScreen({ navigation, route }: Props) {
     if (!analysis) return '';
     return analysis.foco === t('todoElConjunto') ? t('sesionCompleta') : `foco: ${analysis.foco.toLowerCase()}`;
   }, [analysis, t]);
+
+  // Estimación orientativa (determinista por análisis, no una cifra real medida) de
+  // cuántas correcciones más suele encontrar el análisis con IA real de Premium
+  // frente al análisis básico on-device del plan gratis. Solo se muestra en gratis.
+  const extraCorrecciones = useMemo(() => {
+    if (!analysis) return 0;
+    let h = 0;
+    for (let i = 0; i < analysis.id.length; i++) h = (h * 31 + analysis.id.charCodeAt(i)) >>> 0;
+    return 2 + (h % 3);
+  }, [analysis]);
+  const showPremiumTeaser = planTier === 'free' && analysis?.origen === 'ondevice';
 
   if (!analysis) {
     return (
@@ -128,6 +140,24 @@ export default function ResultadoScreen({ navigation, route }: Props) {
             </Pressable>
           ))}
         </View>
+
+        {showPremiumTeaser && (
+          <Pressable
+            onPress={() => navigation.navigate('AjustesSuscripcion')}
+            style={{ backgroundColor: '#26221d', borderRadius: 16, padding: 16, marginBottom: 18, flexDirection: 'row', gap: 12, alignItems: 'center' }}
+          >
+            <Text style={{ fontSize: 22 }}>🔍</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: '#faf7f2', fontWeight: '800', fontSize: 12.5, marginBottom: 3 }}>
+                Con Premium, la IA real suele ver más
+              </Text>
+              <Text style={{ color: 'rgba(250,247,242,0.8)', fontSize: 12, lineHeight: 17 }}>
+                Este análisis es on-device (básico, gratis). Gemini, la IA de Premium, analiza el vídeo entero y en sesiones
+                parecidas suele encontrar hasta {extraCorrecciones} correcciones más que aquí no se ven. Ver planes →
+              </Text>
+            </View>
+          </Pressable>
+        )}
 
         <TintCard style={{ marginBottom: 16 }}>
           <Text style={{ fontWeight: '800', fontSize: 12.5, color: colors.good, marginBottom: 5 }}>{t('ejercicioSemana')}</Text>

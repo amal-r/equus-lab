@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { PurchasesOffering } from 'react-native-purchases';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -67,13 +68,19 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
   // desbloquearían las funciones Premium en el resto de la app sin haber pagado.
   const [previewTier, setPreviewTier] = useState<Exclude<PlanTier, 'free'>>(planTier !== 'free' ? planTier : 'premium');
 
-  useEffect(() => {
-    if (HAS_REVENUECAT) {
-      getOfferings()
-        .then(setOffering)
-        .catch(() => setOffering(null));
-    }
-  }, []);
+  // Se vuelve a pedir cada vez que entras a la pantalla (no solo la primera vez que
+  // se monta) — el catálogo de precios de StoreKit a veces cachea una región
+  // distinta a la que luego usa la hoja de compra real; reintentarlo al reabrir
+  // ayuda a que se refresque con la región correcta de la cuenta.
+  useFocusEffect(
+    useCallback(() => {
+      if (HAS_REVENUECAT) {
+        getOfferings()
+          .then(setOffering)
+          .catch(() => setOffering(null));
+      }
+    }, [])
+  );
 
   const isAnual = ciclo === 'anual';
   // Mientras hay una suscripción activa, el precio grande de abajo refleja el plan
