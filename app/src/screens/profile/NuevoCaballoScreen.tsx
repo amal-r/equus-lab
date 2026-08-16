@@ -6,18 +6,18 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { BackHeader } from '../../components/BackHeader';
 import { FormField } from '../../components/FormField';
 import { Chip } from '../../components/Chip';
+import { AddDisciplineChip } from '../../components/AddDisciplineChip';
 import { TintCard } from '../../components/TintCard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
-import { HorseType, Nivel } from '../../types/models';
+import { DISCIPLINAS_BASE, HorseType, Nivel } from '../../types/models';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'NuevoCaballo'>;
 
 const TIPOS: HorseType[] = ['Yegua', 'Semental', 'Castrado', 'Pony'];
-const DISCIPLINAS = ['Doma clásica', 'Salto', 'Completo', 'Doma vaquera'];
 const NIVELES: Nivel[] = ['Iniciado', 'Medio', 'Avanzado'];
 
 export default function NuevoCaballoScreen({ navigation, route }: Props) {
@@ -27,6 +27,8 @@ export default function NuevoCaballoScreen({ navigation, route }: Props) {
   const horses = useAppStore((s) => s.horses);
   const addHorse = useAppStore((s) => s.addHorse);
   const updateHorse = useAppStore((s) => s.updateHorse);
+  const customDisciplinas = useAppStore((s) => s.customDisciplinas);
+  const addCustomDisciplina = useAppStore((s) => s.addCustomDisciplina);
   const editing = editId ? horses.find((h) => h.id === editId) : undefined;
 
   const [nombre, setNombre] = useState(editing?.nombre ?? '');
@@ -76,9 +78,10 @@ export default function NuevoCaballoScreen({ navigation, route }: Props) {
 
         <Text style={{ fontWeight: '800', fontSize: 12.5, color: colors.ink, marginBottom: 8 }}>{t('disciplinaPrincipal')}</Text>
         <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
-          {DISCIPLINAS.map((d) => (
+          {[...DISCIPLINAS_BASE, ...customDisciplinas].map((d) => (
             <Chip key={d} label={d} active={disc === d} onPress={() => setDisc(d)} />
           ))}
+          <AddDisciplineChip onAdd={(nombre) => { addCustomDisciplina(nombre); setDisc(nombre); }} />
         </View>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>

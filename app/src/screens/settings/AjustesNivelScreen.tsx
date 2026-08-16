@@ -5,16 +5,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { BackHeader } from '../../components/BackHeader';
 import { Chip } from '../../components/Chip';
+import { AddDisciplineChip } from '../../components/AddDisciplineChip';
 import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
-import { Nivel } from '../../types/models';
+import { DISCIPLINAS_BASE, Nivel } from '../../types/models';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AjustesNivel'>;
 
 const NIVELES: Nivel[] = ['Iniciación', 'Medio', 'Avanzado'];
-const DISCIPLINAS = ['Doma clásica', 'Salto', 'Completo', 'Doma vaquera'];
 
 export default function AjustesNivelScreen({ navigation }: Props) {
   const { t } = useT();
@@ -22,6 +22,8 @@ export default function AjustesNivelScreen({ navigation }: Props) {
   const rider = useAppStore((s) => s.rider);
   const updateRiderProfile = useAppStore((s) => s.updateRiderProfile);
   const toggleDisciplinaPracticada = useAppStore((s) => s.toggleDisciplinaPracticada);
+  const customDisciplinas = useAppStore((s) => s.customDisciplinas);
+  const addCustomDisciplina = useAppStore((s) => s.addCustomDisciplina);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
@@ -37,7 +39,7 @@ export default function AjustesNivelScreen({ navigation }: Props) {
         </View>
         <Text style={{ fontWeight: '800', fontSize: 13, color: colors.ink, marginBottom: 10 }}>{t('disciplinasQuePracticas')}</Text>
         <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-          {DISCIPLINAS.map((d) => (
+          {[...DISCIPLINAS_BASE, ...customDisciplinas].map((d) => (
             <Chip
               key={d}
               label={rider.disciplinasPracticadas[d] ? `${d} ✓` : d}
@@ -45,6 +47,12 @@ export default function AjustesNivelScreen({ navigation }: Props) {
               onPress={() => toggleDisciplinaPracticada(d)}
             />
           ))}
+          <AddDisciplineChip
+            onAdd={(nombre) => {
+              addCustomDisciplina(nombre);
+              if (!rider.disciplinasPracticadas[nombre]) toggleDisciplinaPracticada(nombre);
+            }}
+          />
         </View>
       </ScreenContainer>
     </SafeAreaView>

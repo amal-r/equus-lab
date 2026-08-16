@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useT } from '../../i18n/useT';
@@ -42,11 +42,15 @@ export default function ChatScreen({ navigation }: Props) {
     const trimmed = text.trim();
     if (!trimmed || sending) return;
     if (isFree && !canAskChat()) {
-      addChatMessage({
-        role: 'coach',
-        text: t('limiteChatGratis', { n: FREE_LIMITS.preguntasChatPorDia }),
-      });
       setInput('');
+      Alert.alert(
+        'Límite diario alcanzado',
+        t('limiteChatGratis', { n: FREE_LIMITS.preguntasChatPorDia }),
+        [
+          { text: 'Ahora no', style: 'cancel' },
+          { text: 'Ver planes', onPress: () => navigation.navigate('AjustesSuscripcion') },
+        ]
+      );
       return;
     }
     if (isFree) registerChatQuestion();

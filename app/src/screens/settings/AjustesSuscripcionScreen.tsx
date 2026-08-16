@@ -27,12 +27,26 @@ type Props = NativeStackScreenProps<RootStackParamList, 'AjustesSuscripcion'>;
 
 const TIERS: Exclude<PlanTier, 'free'>[] = ['premium', 'pro', 'elite'];
 
+/**
+ * Precios de referencia SOLO para el fallback sin tienda conectada (demo/dev).
+ * Cuando hay una compra real, el precio y la moneda los decide Apple/Google según
+ * la región de la cuenta del usuario — eso no se puede forzar desde la app.
+ */
+const USD_FALLBACK: Record<Exclude<PlanTier, 'free'>, { mensual: number; anual: number }> = {
+  premium: { mensual: 8.99, anual: 89.9 },
+  pro: { mensual: 17.99, anual: 179.99 },
+  elite: { mensual: 29.99, anual: 299.99 },
+};
+
 function formatEUR(n: number): string {
   return `${n.toFixed(2).replace('.', ',')} €`;
 }
+function formatUSD(n: number): string {
+  return `$${n.toFixed(2)}`;
+}
 
 export default function AjustesSuscripcionScreen({ navigation }: Props) {
-  const { t } = useT();
+  const { t, lang } = useT();
   const { colors, radius } = useTheme();
   const planTier = useAppStore((s) => s.planTier);
   const ciclo = useAppStore((s) => s.ciclo);
@@ -74,9 +88,15 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
     const id = productIdFor(tier, c);
     return offering.availablePackages.find((p) => p.product.identifier === id) ?? null;
   };
-  const priceFor = (tier: Exclude<PlanTier, 'free'>, fallback: number) => {
+  const priceFor = (tier: Exclude<PlanTier, 'free'>) => {
     const pkg = packageFor(tier, ciclo);
-    return pkg ? pkg.product.priceString : formatEUR(fallback);
+    if (pkg) return pkg.product.priceString;
+    // Sin tienda conectada: fallback local que sí respeta el idioma de la app
+    // (una compra real muestra la moneda que decida Apple/Google según la
+    // región de la cuenta, eso no se puede elegir desde aquí).
+    if (lang === 'en') return formatUSD(USD_FALLBACK[tier][isAnual ? 'anual' : 'mensual']);
+    const def = PLAN_DEFS[tier];
+    return formatEUR(isAnual ? def.precioAnual : def.precioMensual);
   };
 
   const handleSubscribe = async () => {
@@ -200,7 +220,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
                   {usoAviso ? t('usoAvisoMsg') : t('usoNormalMsg', { min: usoTotal })}
                 </Text>
               </View>
-              {usoAviso && (
+              {subEstado === 'activa' && (
                 <Pressable
                   onPress={handleBuyExtraPack}
                   disabled={busy === 'pack'}
@@ -256,7 +276,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
           {TIERS.map((id) => {
             const def = PLAN_DEFS[id];
             const on = (subEstado !== 'gratis' ? planTier : previewTier) === id;
-            const price = priceFor(id, isAnual ? def.precioAnual : def.precioMensual);
+            const price = priceFor(id);
             return (
               <Pressable
                 key={id}
@@ -298,7 +318,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
         {subEstado === 'gratis' && (
           <>
             <PrimaryButton
-              label={t('suscribirme', { plan: selDef.nombre, precio: priceFor(previewTier, isAnual ? selDef.precioAnual : selDef.precioMensual) })}
+              label={t('suscribirme', { plan: selDef.nombre, precio: priceFor(previewTier) })}
               onPress={handleSubscribe}
               loading={busy === 'purchase'}
               style={{ marginBottom: 8 }}
@@ -310,7 +330,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
         {subEstado === 'activa' && (
           <>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
-              <Text style={{ fontWeight: '800', fontSize: 26, color: colors.ink }}>{priceFor(planTier !== 'free' ? planTier : previewTier, isAnual ? selDef.precioAnual : selDef.precioMensual)}</Text>
+              <Text style={{ fontWeight: '800', fontSize: 26, color: colors.ink }}>{priceFor(planTier !== 'free' ? planTier : previewTier)}</Text>
               <Text style={{ fontSize: 12, color: colors.m50 }}>{isAnual ? '/ año' : '/ mes'}</Text>
             </View>
             {!HAS_REVENUECAT && (

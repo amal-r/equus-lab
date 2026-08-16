@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Image, Pressable, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../../components/ScreenContainer';
@@ -59,7 +59,11 @@ export default function PerfilScreen({ navigation }: Props) {
         </View>
 
         <View style={{ alignItems: 'center', paddingVertical: 20 }}>
-          <View style={{ width: 82, height: 82, borderRadius: 41, backgroundColor: colors.ph, borderWidth: 3, borderColor: colors.accent }} />
+          {rider.avatarUri ? (
+            <Image source={{ uri: rider.avatarUri }} style={{ width: 82, height: 82, borderRadius: 41, borderWidth: 3, borderColor: colors.accent }} />
+          ) : (
+            <View style={{ width: 82, height: 82, borderRadius: 41, backgroundColor: colors.ph, borderWidth: 3, borderColor: colors.accent }} />
+          )}
           <Text style={{ fontWeight: '800', fontSize: 20, color: colors.ink, marginTop: 12 }}>{rider.nombre}</Text>
           <Text style={{ fontSize: 12.5, color: colors.m55, marginTop: 2 }}>
             {rider.nivel} · {rider.edad} años · {rider.aniosMontando} {t('aniosMontando')}

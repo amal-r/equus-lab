@@ -6,18 +6,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { BackHeader } from '../../components/BackHeader';
 import { Chip } from '../../components/Chip';
+import { AddDisciplineChip } from '../../components/AddDisciplineChip';
 import { TintCard } from '../../components/TintCard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { BottomNav } from '../../components/BottomNav';
 import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
-import { FREE_LIMITS, PLAN_DEFS } from '../../types/models';
+import { DISCIPLINAS_BASE, FREE_LIMITS, PLAN_DEFS } from '../../types/models';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Subir'>;
-
-const DISC_BASE = ['Doma clásica', 'Salto', 'Completo', 'Doma vaquera'];
 
 export default function SubirScreen({ navigation }: Props) {
   const { t } = useT();
@@ -146,10 +145,10 @@ export default function SubirScreen({ navigation }: Props) {
 
         <Text style={{ fontWeight: '800', fontSize: 13, color: colors.ink, marginBottom: 9 }}>{t('disciplina')}</Text>
         <View style={{ flexDirection: 'row', gap: 9, flexWrap: 'wrap', marginBottom: 18 }}>
-          {[...DISC_BASE, ...customDisciplinas].map((d) => (
+          {[...DISCIPLINAS_BASE, ...customDisciplinas].map((d) => (
             <Chip key={d} label={d} active={disciplinaSel === d} onPress={() => setDisciplinaSel(d)} />
           ))}
-          <Chip label={t('otraDisciplina')} active={false} dashed onPress={addCustomDisciplina} />
+          <AddDisciplineChip onAdd={addCustomDisciplina} />
         </View>
 
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>

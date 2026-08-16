@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Text, View } from 'react-native';
+import { Alert, Image, Pressable, Text, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../../components/ScreenContainer';
@@ -27,9 +28,27 @@ export default function EditarPerfilScreen({ navigation }: Props) {
   const [edad, setEdad] = useState(rider.edad);
   const [anios, setAnios] = useState(rider.aniosMontando);
   const [nivel, setNivel] = useState<Nivel>((rider.nivel as Nivel) || 'Medio');
+  const [avatarUri, setAvatarUri] = useState(rider.avatarUri);
+
+  const pickAvatar = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permiso necesario', 'Necesito acceso a tu galería para elegir una foto de perfil.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets?.[0]) {
+      setAvatarUri(result.assets[0].uri);
+    }
+  };
 
   const save = () => {
-    updateRiderProfile({ nombre: nombre.trim() || rider.nombre, edad, aniosMontando: anios, nivel });
+    updateRiderProfile({ nombre: nombre.trim() || rider.nombre, edad, aniosMontando: anios, nivel, avatarUri });
     navigation.goBack();
   };
 
@@ -38,7 +57,30 @@ export default function EditarPerfilScreen({ navigation }: Props) {
       <ScreenContainer>
         <BackHeader title={t('editarPerfil')} onBack={() => navigation.goBack()} />
         <View style={{ alignItems: 'center', marginBottom: 22 }}>
-          <View style={{ width: 82, height: 82, borderRadius: 41, backgroundColor: colors.ph, borderWidth: 3, borderColor: colors.accent }} />
+          <Pressable onPress={pickAvatar} style={{ position: 'relative' }}>
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={{ width: 82, height: 82, borderRadius: 41, borderWidth: 3, borderColor: colors.accent }} />
+            ) : (
+              <View style={{ width: 82, height: 82, borderRadius: 41, backgroundColor: colors.ph, borderWidth: 3, borderColor: colors.accent }} />
+            )}
+            <View
+              style={{
+                position: 'absolute',
+                right: -2,
+                bottom: -2,
+                width: 28,
+                height: 28,
+                borderRadius: 14,
+                backgroundColor: colors.accent,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 2,
+                borderColor: colors.bg,
+              }}
+            >
+              <Text style={{ fontSize: 13 }}>📷</Text>
+            </View>
+          </Pressable>
         </View>
         <FormField label={t('nombreJinete')} value={nombre} onChangeText={setNombre} placeholder="Tu nombre" />
         <View style={{ flexDirection: 'row', gap: 12, marginBottom: 16 }}>

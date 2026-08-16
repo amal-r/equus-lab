@@ -1,6 +1,10 @@
 export type Lang = 'es' | 'en';
 export type CoachTone = 'Cercano' | 'Técnico' | 'Exigente';
 export type Disciplina = 'Doma clásica' | 'Salto' | 'Completo' | 'Doma vaquera' | string;
+
+/** Disciplinas fijas de partida. En cualquier selector, el usuario puede además escribir
+ * la suya propia — se guarda en `customDisciplinas` (store) y la IA la usa tal cual. */
+export const DISCIPLINAS_BASE: Disciplina[] = ['Doma clásica', 'Salto', 'Completo', 'Doma vaquera'];
 export type HorseType = 'Yegua' | 'Semental' | 'Castrado' | 'Macho' | 'Pony';
 export type Nivel = 'Iniciación' | 'Medio' | 'Avanzado' | 'Iniciado' | '';
 export type PlanTier = 'free' | 'premium' | 'pro' | 'elite';
@@ -27,6 +31,7 @@ export interface RiderProfile {
   aniosMontando: string;
   nivel: Nivel;
   disciplinasPracticadas: Record<string, boolean>;
+  avatarUri?: string;
 }
 
 export interface ChatMessage {

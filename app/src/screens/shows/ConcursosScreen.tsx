@@ -5,16 +5,16 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { Chip } from '../../components/Chip';
+import { AddDisciplineChip } from '../../components/AddDisciplineChip';
 import { BottomNav } from '../../components/BottomNav';
 import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
 import { judgeShow } from '../../ondevice/judgeShow';
+import { DISCIPLINAS_BASE } from '../../types/models';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Concursos'>;
-
-const DISCIPLINAS = ['Doma clásica', 'Salto', 'Completo', 'Doma vaquera'];
 
 export default function ConcursosScreen({ navigation }: Props) {
   const { t } = useT();
@@ -22,6 +22,8 @@ export default function ConcursosScreen({ navigation }: Props) {
   const planTier = useAppStore((s) => s.planTier);
   const concDisciplina = useAppStore((s) => s.concDisciplina);
   const setConcDisciplina = useAppStore((s) => s.setConcDisciplina);
+  const customDisciplinas = useAppStore((s) => s.customDisciplinas);
+  const addCustomDisciplina = useAppStore((s) => s.addCustomDisciplina);
   const veredictos = useAppStore((s) => s.veredictos);
   const addVeredicto = useAppStore((s) => s.addVeredicto);
   const horses = useAppStore((s) => s.horses);
@@ -98,9 +100,10 @@ export default function ConcursosScreen({ navigation }: Props) {
 
         <Text style={{ fontWeight: '800', fontSize: 13, color: colors.ink, marginBottom: 10 }}>{t('disciplinas')}</Text>
         <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
-          {DISCIPLINAS.map((d) => (
+          {[...DISCIPLINAS_BASE, ...customDisciplinas].map((d) => (
             <Chip key={d} label={d} active={concDisciplina === d} onPress={() => setConcDisciplina(d)} />
           ))}
+          <AddDisciplineChip onAdd={(nombre) => { addCustomDisciplina(nombre); setConcDisciplina(nombre); }} />
         </View>
 
         <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 11 }}>

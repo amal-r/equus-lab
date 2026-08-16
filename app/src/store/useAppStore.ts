@@ -7,6 +7,7 @@ import {
   Ciclo,
   CoachTone,
   Disciplina,
+  DISCIPLINAS_BASE,
   Horse,
   Lang,
   NotifPrefs,
@@ -87,7 +88,8 @@ interface AppState {
   setSelectedHorse: (id: string | null) => void;
   setDisciplinaSel: (d: Disciplina) => void;
   setFocoSel: (f: string) => void;
-  addCustomDisciplina: () => void;
+  /** Añade (si no existe ya) y selecciona una disciplina escrita libremente por el jinete. */
+  addCustomDisciplina: (nombre: string) => void;
   setVideo: (uri: string, name: string, durationSec: number) => void;
   clearVideo: () => void;
   setConcDisciplina: (d: Disciplina) => void;
@@ -217,10 +219,13 @@ export const useAppStore = create<AppState>()(
       setSelectedHorse: (id) => set({ selectedHorseId: id }),
       setDisciplinaSel: (d) => set({ disciplinaSel: d, focoSel: 'Todo el conjunto' }),
       setFocoSel: (f) => set({ focoSel: f }),
-      addCustomDisciplina: () =>
+      addCustomDisciplina: (nombreRaw) =>
         set((s) => {
-          const nombre = s.customDisciplinas.length ? `Otra ${s.customDisciplinas.length + 1}` : 'Otra';
-          return { customDisciplinas: [...s.customDisciplinas, nombre], disciplinaSel: nombre, focoSel: 'Todo el conjunto' };
+          const nombre = nombreRaw.trim();
+          if (!nombre) return {};
+          const yaExiste = [...DISCIPLINAS_BASE, ...s.customDisciplinas].some((d) => d.toLowerCase() === nombre.toLowerCase());
+          const customDisciplinas = yaExiste ? s.customDisciplinas : [...s.customDisciplinas, nombre];
+          return { customDisciplinas, disciplinaSel: nombre, focoSel: 'Todo el conjunto' };
         }),
       setVideo: (uri, name, durationSec) => set({ videoUri: uri, videoName: name, videoDurationSec: durationSec }),
       clearVideo: () => set({ videoUri: null, videoName: null, videoDurationSec: null }),

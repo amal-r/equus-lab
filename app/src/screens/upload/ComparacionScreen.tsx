@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import React from 'react';
+import { Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { BackHeader } from '../../components/BackHeader';
 import { useT } from '../../i18n/useT';
@@ -15,7 +16,10 @@ export default function ComparacionScreen({ navigation, route }: Props) {
   const { t } = useT();
   const { colors, radius } = useTheme();
   const analysis = useAppStore((s) => s.analyses.find((a) => a.id === route.params.analysisId));
-  const [playing, setPlaying] = useState(false);
+
+  const player = useVideoPlayer(analysis?.videoUri ?? null, (p) => {
+    p.loop = false;
+  });
 
   if (!analysis) return null;
 
@@ -29,7 +33,7 @@ export default function ComparacionScreen({ navigation, route }: Props) {
       <ScreenContainer>
         <BackHeader title={t('comparacion')} onBack={() => navigation.goBack()} />
 
-        <View style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: colors.ph, height: 158, marginBottom: 10 }}>
+        <View style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: colors.ph, height: 180, marginBottom: 10 }}>
           <View
             style={{
               position: 'absolute',
@@ -42,11 +46,15 @@ export default function ComparacionScreen({ navigation, route }: Props) {
               zIndex: 1,
             }}
           >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>{t('tuMonta')} · 0:34</Text>
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>{t('tuMonta')}</Text>
           </View>
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontSize: 10.5, color: colors.m40 }}>frame del vídeo</Text>
-          </View>
+          {analysis.videoUri ? (
+            <VideoView player={player} style={{ width: '100%', height: '100%' }} contentFit="cover" nativeControls />
+          ) : (
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <Text style={{ fontSize: 10.5, color: colors.m40 }}>vídeo no disponible</Text>
+            </View>
+          )}
         </View>
 
         <View style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: '#dbe3d5', height: 158, marginBottom: 16 }}>
@@ -64,22 +72,11 @@ export default function ComparacionScreen({ navigation, route }: Props) {
           >
             <Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>{t('referenciaNivel')}</Text>
           </View>
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontSize: 10.5, color: colors.m40 }}>técnica correcta</Text>
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
+            <Text style={{ fontSize: 10.5, color: colors.m40, textAlign: 'center', lineHeight: 15 }}>
+              técnica correcta{'\n'}(vídeo de referencia — próximamente)
+            </Text>
           </View>
-        </View>
-
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#26221d', borderRadius: 14, padding: 12, marginBottom: 18 }}>
-          <Pressable
-            onPress={() => setPlaying((p) => !p)}
-            style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Text style={{ color: '#fff', fontSize: 14 }}>{playing ? '❚❚' : '▶'}</Text>
-          </Pressable>
-          <View style={{ flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.16)', borderRadius: 4, overflow: 'hidden' }}>
-            <View style={{ width: '40%', height: '100%', backgroundColor: colors.accent, borderRadius: 4 }} />
-          </View>
-          <Text style={{ color: '#fff', fontSize: 11, fontWeight: '600' }}>0:34</Text>
         </View>
 
         <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink, marginBottom: 11 }}>{t('diferenciasClave')}</Text>
