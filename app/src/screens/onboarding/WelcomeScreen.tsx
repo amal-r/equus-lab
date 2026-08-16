@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,7 +21,7 @@ export default function WelcomeScreen({ navigation }: Props) {
         <View style={styles.content}>
           <View style={styles.brandRow}>
             <View style={styles.brandDot}>
-              <Text style={{ fontSize: 15 }}>🐴</Text>
+              <Image source={require('../../../assets/logo-horse.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
             </View>
             <Text style={styles.brandText}>EQUUS LAB</Text>
           </View>
