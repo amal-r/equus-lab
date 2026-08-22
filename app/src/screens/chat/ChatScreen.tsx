@@ -59,7 +59,11 @@ export default function ChatScreen({ navigation }: Props) {
     setInput('');
     setSending(true);
     try {
-      const reply = await askCoach(trimmed, !isFree, messages);
+      const reply = await askCoach(trimmed, !isFree, messages, {
+        esPieATierra: lastAnalysis?.esPieATierra,
+        disciplina: lastAnalysis?.disciplina,
+        ejercicio: lastAnalysis?.ejercicio,
+      });
       addChatMessage({ role: 'coach', text: reply });
     } finally {
       setSending(false);
@@ -86,6 +90,7 @@ export default function ChatScreen({ navigation }: Props) {
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <FlatList
           ref={listRef}
+          style={{ flex: 1 }}
           data={messages}
           keyExtractor={(m) => m.id}
           contentContainerStyle={{ padding: 16, gap: 10 }}

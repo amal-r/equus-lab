@@ -61,6 +61,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
   const buyExtraPack = useAppStore((s) => s.buyExtraPack);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
+  const [debugMsg, setDebugMsg] = useState<string>('');
   const [busy, setBusy] = useState<'purchase' | 'restore' | 'pack' | null>(null);
   // Plan que el usuario está MIRANDO en esta pantalla (no el que tiene contratado).
   // Nunca debe escribirse en el store hasta que se confirme la compra en subscribe():
@@ -74,11 +75,20 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
   // ayuda a que se refresque con la región correcta de la cuenta.
   useFocusEffect(
     useCallback(() => {
-      if (HAS_REVENUECAT) {
-        getOfferings()
-          .then(setOffering)
-          .catch(() => setOffering(null));
+      if (!HAS_REVENUECAT) {
+        setDebugMsg('HAS_REVENUECAT=false (no hay clave embebida en esta build)');
+        return;
       }
+      getOfferings()
+        .then((o) => {
+          setOffering(o);
+          if (!o) setDebugMsg('getOfferings() devolvió null: no hay ninguna Offering marcada como "Current" en RevenueCat');
+          else setDebugMsg(`OK: offering "${o.identifier}" con ${o.availablePackages.length} paquetes: ${o.availablePackages.map((p) => p.product.identifier).join(', ')}`);
+        })
+        .catch((e) => {
+          setOffering(null);
+          setDebugMsg(`Error en getOfferings(): ${e?.message ?? String(e)}`);
+        });
     }, [])
   );
 
@@ -386,6 +396,12 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
             {busy === 'restore' ? 'Restaurando…' : 'Restaurar compras'}
           </Text>
         </Pressable>
+
+        {!!debugMsg && (
+          <Text style={{ textAlign: 'center', fontSize: 9.5, color: colors.m40, marginTop: 10, lineHeight: 13 }}>
+            debug: {debugMsg}
+          </Text>
+        )}
       </ScreenContainer>
     </SafeAreaView>
   );
