@@ -71,15 +71,13 @@ export const strings = {
     loQueHicisteBien: '✅ Lo que hiciste bien',
     loQuePuedesMejorar: 'Lo que puedes mejorar',
     ejercicioSemana: '💪 Ejercicio de la semana',
-    verComparacion: 'Ver comparación con la referencia',
+    verComparacion: 'Ver errores y correcciones',
     hablaConEntrenador: 'Habla con tu entrenador…',
     sesionCompleta: 'sesión completa',
 
     // Comparación
-    comparacion: 'Comparación',
-    tuMonta: 'Tu monta',
-    referenciaNivel: 'Referencia · nivel San Jorge',
-    diferenciasClave: 'Diferencias clave',
+    comparacion: 'Correcciones',
+    diferenciasClave: 'Errores y correcciones',
 
     // Chat
     entrenadorIA: 'Entrenador IA',
@@ -250,14 +248,12 @@ export const strings = {
     loQueHicisteBien: '✅ What you did well',
     loQuePuedesMejorar: 'What you can improve',
     ejercicioSemana: '💪 Exercise of the week',
-    verComparacion: 'See comparison with reference',
+    verComparacion: 'See errors and corrections',
     hablaConEntrenador: 'Talk to your coach…',
     sesionCompleta: 'full session',
 
-    comparacion: 'Comparison',
-    tuMonta: 'Your ride',
-    referenciaNivel: 'Reference · advanced level',
-    diferenciasClave: 'Key differences',
+    comparacion: 'Corrections',
+    diferenciasClave: 'Errors and corrections',
 
     entrenadorIA: 'AI Coach',
     enLinea: '● online',

@@ -24,8 +24,8 @@ export default function ComparacionScreen({ navigation, route }: Props) {
   if (!analysis) return null;
 
   const diffs = [
-    ...analysis.tips.slice(0, 2).map((tip) => ({ icon: '∠', color: colors.accent, text: tip.text })),
-    { icon: '✓', color: colors.good, text: 'Tu cadencia y ritmo coinciden con la referencia. ¡Bien!' },
+    ...analysis.tips.map((tip) => ({ icon: '∠', color: colors.accent, text: tip.text })),
+    { icon: '✓', color: colors.good, text: analysis.bienHecho },
   ];
 
   return (
@@ -33,21 +33,7 @@ export default function ComparacionScreen({ navigation, route }: Props) {
       <ScreenContainer>
         <BackHeader title={t('comparacion')} onBack={() => navigation.goBack()} />
 
-        <View style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: colors.ph, height: 180, marginBottom: 10 }}>
-          <View
-            style={{
-              position: 'absolute',
-              top: 12,
-              left: 14,
-              backgroundColor: colors.accent,
-              borderRadius: 10,
-              paddingVertical: 5,
-              paddingHorizontal: 10,
-              zIndex: 1,
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>{t('tuMonta')}</Text>
-          </View>
+        <View style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: colors.ph, height: 220, marginBottom: 16 }}>
           {analysis.videoUri ? (
             <VideoView player={player} style={{ width: '100%', height: '100%' }} contentFit="cover" nativeControls />
           ) : (
@@ -55,28 +41,6 @@ export default function ComparacionScreen({ navigation, route }: Props) {
               <Text style={{ fontSize: 10.5, color: colors.m40 }}>vídeo no disponible</Text>
             </View>
           )}
-        </View>
-
-        <View style={{ borderRadius: 20, overflow: 'hidden', backgroundColor: '#dbe3d5', height: 158, marginBottom: 16 }}>
-          <View
-            style={{
-              position: 'absolute',
-              top: 12,
-              left: 14,
-              backgroundColor: colors.good,
-              borderRadius: 10,
-              paddingVertical: 5,
-              paddingHorizontal: 10,
-              zIndex: 1,
-            }}
-          >
-            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 11 }}>{t('referenciaNivel')}</Text>
-          </View>
-          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
-            <Text style={{ fontSize: 10.5, color: colors.m40, textAlign: 'center', lineHeight: 15 }}>
-              técnica correcta{'\n'}(vídeo de referencia — próximamente)
-            </Text>
-          </View>
         </View>
 
         <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink, marginBottom: 11 }}>{t('diferenciasClave')}</Text>

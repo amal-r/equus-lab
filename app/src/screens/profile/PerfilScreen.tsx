@@ -21,7 +21,7 @@ const LOGROS = [
 ];
 
 export default function PerfilScreen({ navigation }: Props) {
-  const { t } = useT();
+  const { t, tArr } = useT();
   const { colors, radius } = useTheme();
   const rider = useAppStore((s) => s.rider);
   const horses = useAppStore((s) => s.horses);
@@ -49,7 +49,7 @@ export default function PerfilScreen({ navigation }: Props) {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
       <ScreenContainer>
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: -6 }}>
-          <Text style={{ fontWeight: '800', fontSize: 16, color: colors.ink }}>{t('nav')[3] ?? 'Perfil'}</Text>
+          <Text style={{ fontWeight: '800', fontSize: 16, color: colors.ink }}>{tArr('nav')[3] ?? 'Perfil'}</Text>
           <Pressable
             onPress={() => navigation.navigate('AjustesMenu')}
             style={{ marginLeft: 'auto', backgroundColor: colors.surface, width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}
