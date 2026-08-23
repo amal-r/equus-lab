@@ -95,12 +95,15 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
     const id = productIdFor(tier, c);
     return offering.availablePackages.find((p) => p.product.identifier === id) ?? null;
   };
+  // El precio que se MUESTRA en esta lista sigue siempre el idioma de la app
+  // (euros en ES, dólares en EN) usando nuestros propios precios configurados
+  // -- en Sandbox/TestFlight, Apple a veces devuelve el priceString del
+  // catálogo en la moneda equivocada (fallo conocido de StoreKit en pruebas,
+  // ver https://community.revenuecat.com/sdks-51/testflight-paywall-shows-us-price-with-dollars-instead-of-german-price-with-euros-6589),
+  // así que no es fiable para mostrar aquí. La compra REAL (pkg de RevenueCat,
+  // en handleSubscribe) sí usa siempre el precio y la moneda auténticos que
+  // decida Apple/Google según la cuenta -- eso nunca se fuerza.
   const priceFor = (tier: Exclude<PlanTier, 'free'>) => {
-    const pkg = packageFor(tier, ciclo);
-    if (pkg) return pkg.product.priceString;
-    // Sin tienda conectada: fallback local que sí respeta el idioma de la app
-    // (una compra real muestra la moneda que decida Apple/Google según la
-    // región de la cuenta, eso no se puede elegir desde aquí).
     if (lang === 'en') return formatUSD(USD_FALLBACK[tier][isAnual ? 'anual' : 'mensual']);
     const def = PLAN_DEFS[tier];
     return formatEUR(isAnual ? def.precioAnual : def.precioMensual);
@@ -315,7 +318,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={{ fontWeight: '800', fontSize: 16, color: on ? '#faf7f2' : colors.ink }}>{price}</Text>
-                  <Text style={{ fontSize: 10, color: on ? 'rgba(250,247,242,0.6)' : colors.m55 }}>{isAnual ? '/ año' : '/ mes'}</Text>
+                  <Text style={{ fontSize: 10, color: on ? 'rgba(250,247,242,0.6)' : colors.m55 }}>{isAnual ? t('porAnio') : t('porMes')}</Text>
                 </View>
               </Pressable>
             );
@@ -338,7 +341,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
           <>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
               <Text style={{ fontWeight: '800', fontSize: 26, color: colors.ink }}>{priceFor(planTier !== 'free' ? planTier : previewTier)}</Text>
-              <Text style={{ fontSize: 12, color: colors.m50 }}>{isAnual ? '/ año' : '/ mes'}</Text>
+              <Text style={{ fontSize: 12, color: colors.m50 }}>{isAnual ? t('porAnio') : t('porMes')}</Text>
             </View>
             {!HAS_REVENUECAT && (
               <PrimaryButton
