@@ -115,14 +115,19 @@ export default function ChatScreen({ navigation }: Props) {
           }}
         />
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ backgroundColor: colors.bg, paddingTop: 8, paddingHorizontal: 14 }} contentContainerStyle={{ gap: 8 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ flexGrow: 0, flexShrink: 0, height: 40, backgroundColor: colors.bg }}
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 14, alignItems: 'center' }}
+        >
           {suggestions.map((s) => (
             <Pressable
               key={s}
               onPress={() => send(s)}
-              style={{ borderWidth: 1, borderColor: 'rgba(192,95,58,0.35)', backgroundColor: colors.surface, borderRadius: 20, paddingVertical: 8, paddingHorizontal: 13 }}
+              style={{ borderWidth: 1, borderColor: 'rgba(192,95,58,0.35)', backgroundColor: colors.surface, borderRadius: 20, paddingVertical: 7, paddingHorizontal: 12 }}
             >
-              <Text style={{ color: colors.accent, fontSize: 12, fontWeight: '600' }}>{s}</Text>
+              <Text style={{ color: colors.accent, fontSize: 11.5, fontWeight: '600' }}>{s}</Text>
             </Pressable>
           ))}
         </ScrollView>
