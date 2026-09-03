@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { PurchasesOffering } from 'react-native-purchases';
@@ -120,7 +120,7 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
     if (!pkg) {
       Alert.alert(
         'Plan no disponible todavía',
-        `No encuentro el producto "${productIdFor(previewTier, ciclo)}" en el offering de RevenueCat. Comprueba que existe en App Store Connect / Google Play y que está enlazado en RevenueCat.`
+        `No encuentro el producto "${productIdFor(previewTier, ciclo)}" en el offering de RevenueCat. Comprueba que existe en App Store Connect y que está enlazado en RevenueCat.`
       );
       return;
     }
@@ -333,9 +333,18 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
               loading={busy === 'purchase'}
               style={{ marginBottom: 8 }}
             />
-            <Text style={{ textAlign: 'center', fontSize: 11, color: colors.m50, lineHeight: 16, marginBottom: 14 }}>{t('cobroTiendaNota')}</Text>
+            <Text style={{ textAlign: 'center', fontSize: 11, color: colors.m50, lineHeight: 16, marginBottom: 10 }}>{t('cobroTiendaNota')}</Text>
           </>
         )}
+
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginBottom: 14 }}>
+          <Pressable onPress={() => Linking.openURL('https://amalrehouni.com/equuslab/terminos.html')}>
+            <Text style={{ fontSize: 11, color: colors.m50, textDecorationLine: 'underline' }}>{t('terminosDeUso')}</Text>
+          </Pressable>
+          <Pressable onPress={() => Linking.openURL('https://amalrehouni.com/equuslab/privacidad.html')}>
+            <Text style={{ fontSize: 11, color: colors.m50, textDecorationLine: 'underline' }}>{t('politicaPrivacidad')}</Text>
+          </Pressable>
+        </View>
 
         {subEstado === 'activa' && (
           <>

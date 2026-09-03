@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Linking, Pressable, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../../components/ScreenContainer';
@@ -119,6 +119,15 @@ export default function AjustesMenuScreen({ navigation }: Props) {
               <Text style={{ color: colors.danger, fontWeight: '700', fontSize: 13 }}>{t('eliminarPerfil')}</Text>
             </Pressable>
           )}
+        </View>
+
+        <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 16, marginTop: 18 }}>
+          <Pressable onPress={() => Linking.openURL('https://amalrehouni.com/equuslab/terminos.html')}>
+            <Text style={{ fontSize: 11, color: colors.m50, textDecorationLine: 'underline' }}>{t('terminosDeUso')}</Text>
+          </Pressable>
+          <Pressable onPress={() => Linking.openURL('https://amalrehouni.com/equuslab/privacidad.html')}>
+            <Text style={{ fontSize: 11, color: colors.m50, textDecorationLine: 'underline' }}>{t('politicaPrivacidad')}</Text>
+          </Pressable>
         </View>
       </ScreenContainer>
     </SafeAreaView>
