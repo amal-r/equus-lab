@@ -35,13 +35,8 @@ export default function HomeScreen({ navigation }: Props) {
   const rider = useAppStore((s) => s.rider);
   const planTier = useAppStore((s) => s.planTier);
   const analyses = useAppStore((s) => s.analyses);
-  const analisisHoy = useAppStore((s) => s.analisisHoy);
-  const chatHoy = useAppStore((s) => s.chatHoy);
-  const ensureDailyReset = useAppStore((s) => s.ensureDailyReset);
-
-  React.useEffect(() => {
-    ensureDailyReset();
-  }, [ensureDailyReset]);
+  const analisisTotal = useAppStore((s) => s.analisisTotal);
+  const chatTotal = useAppStore((s) => s.chatTotal);
 
   const consejo = useMemo(() => {
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
@@ -51,8 +46,8 @@ export default function HomeScreen({ navigation }: Props) {
   const ultima = analyses[0];
   const racha = useMemo(() => computeWeekStreak(analyses.map((a) => a.fecha)), [analyses]);
   const isFree = planTier === 'free';
-  const analisisLeft = Math.max(0, FREE_LIMITS.analisisPorDia - analisisHoy);
-  const chatLeft = Math.max(0, FREE_LIMITS.preguntasChatPorDia - chatHoy);
+  const analisisLeft = Math.max(0, FREE_LIMITS.analisisGratisTotal - analisisTotal);
+  const chatLeft = Math.max(0, FREE_LIMITS.preguntasChatGratisTotal - chatTotal);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
@@ -171,7 +166,7 @@ export default function HomeScreen({ navigation }: Props) {
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 11 }}>
-              <Text style={{ fontWeight: '800', fontSize: 12.5, color: colors.ink }}>{t('usoDeHoy')}</Text>
+              <Text style={{ fontWeight: '800', fontSize: 12.5, color: colors.ink }}>{t('cupoGratisTitulo')}</Text>
               <Pressable
                 onPress={() => navigation.navigate('AjustesSuscripcion')}
                 style={{ marginLeft: 'auto', backgroundColor: colors.chip, borderRadius: 20, paddingVertical: 5, paddingHorizontal: 11 }}
@@ -183,7 +178,7 @@ export default function HomeScreen({ navigation }: Props) {
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
                   <Text style={{ fontWeight: '800', fontSize: 19, color: colors.ink }}>{analisisLeft}</Text>
-                  <Text style={{ fontSize: 11, color: colors.m50 }}>/ {FREE_LIMITS.analisisPorDia}</Text>
+                  <Text style={{ fontSize: 11, color: colors.m50 }}>/ {FREE_LIMITS.analisisGratisTotal}</Text>
                 </View>
                 <Text style={{ fontSize: 10.5, color: colors.m55, marginTop: 1 }}>{t('analisisRestantes')}</Text>
               </View>
@@ -191,7 +186,7 @@ export default function HomeScreen({ navigation }: Props) {
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
                   <Text style={{ fontWeight: '800', fontSize: 19, color: colors.ink }}>{chatLeft}</Text>
-                  <Text style={{ fontSize: 11, color: colors.m50 }}>/ {FREE_LIMITS.preguntasChatPorDia}</Text>
+                  <Text style={{ fontSize: 11, color: colors.m50 }}>/ {FREE_LIMITS.preguntasChatGratisTotal}</Text>
                 </View>
                 <Text style={{ fontSize: 10.5, color: colors.m55, marginTop: 1 }}>{t('preguntasChat')}</Text>
               </View>

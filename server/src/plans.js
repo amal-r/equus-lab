@@ -8,10 +8,12 @@ export const PLAN_DEFS = {
   elite: { id: 'elite', nombre: 'Elite', minMes: 2000, clipMaxMin: 90, precioMensual: 34.99, precioAnual: 339.99 },
 };
 
+// Cupo gratis DE POR VIDA por cuenta -- no se resetea nunca (ni a diario ni de
+// ninguna otra forma). Ver models.ts FREE_LIMITS en la app, debe ir sincronizado.
 export const FREE_LIMITS = {
   clipMaxMin: 3,
-  analisisPorDia: 1,
-  preguntasChatPorDia: 3,
+  analisisGratisTotal: 1,
+  preguntasChatGratisTotal: 3,
 };
 
 export const EXTRA_PACK_MIN = 100;

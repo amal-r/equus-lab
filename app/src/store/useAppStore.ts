@@ -19,10 +19,6 @@ import {
 } from '../types/models';
 import { FREE_LIMITS } from '../types/models';
 
-function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 function genId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
@@ -56,9 +52,10 @@ interface AppState {
   usoMin: number;
   usoTotal: number;
 
-  analisisHoy: number;
-  chatHoy: number;
-  lastUsageResetDate: string;
+  // Limite gratis de por vida (no se resetea nunca): 1 analisis y 3 preguntas de
+  // chat POR CUENTA, no por dia. Una cuenta nueva (deleteAccount) empieza de cero.
+  analisisTotal: number;
+  chatTotal: number;
 
   analyses: AnalysisResult[];
   currentAnalysisId: string | null;
@@ -94,7 +91,6 @@ interface AppState {
   clearVideo: () => void;
   setConcDisciplina: (d: Disciplina) => void;
 
-  ensureDailyReset: () => void;
   canStartFreeAnalysis: () => boolean;
   registerFreeAnalysis: () => void;
   canAskChat: () => boolean;
@@ -162,9 +158,8 @@ export const useAppStore = create<AppState>()(
       usoMin: 0,
       usoTotal: 0,
 
-      analisisHoy: 0,
-      chatHoy: 0,
-      lastUsageResetDate: todayKey(),
+      analisisTotal: 0,
+      chatTotal: 0,
 
       analyses: [],
       currentAnalysisId: null,
@@ -196,6 +191,8 @@ export const useAppStore = create<AppState>()(
           subEstado: 'gratis',
           usoMin: 0,
           usoTotal: 0,
+          analisisTotal: 0,
+          chatTotal: 0,
         }),
 
       updateRiderProfile: (partial) => set((s) => ({ rider: { ...s.rider, ...partial } })),
@@ -231,22 +228,10 @@ export const useAppStore = create<AppState>()(
       clearVideo: () => set({ videoUri: null, videoName: null, videoDurationSec: null }),
       setConcDisciplina: (d) => set({ concDisciplina: d }),
 
-      ensureDailyReset: () => {
-        const today = todayKey();
-        if (get().lastUsageResetDate !== today) {
-          set({ analisisHoy: 0, chatHoy: 0, lastUsageResetDate: today });
-        }
-      },
-      canStartFreeAnalysis: () => {
-        get().ensureDailyReset();
-        return get().planTier !== 'free' || get().analisisHoy < FREE_LIMITS.analisisPorDia;
-      },
-      registerFreeAnalysis: () => set((s) => ({ analisisHoy: s.analisisHoy + 1 })),
-      canAskChat: () => {
-        get().ensureDailyReset();
-        return get().planTier !== 'free' || get().chatHoy < FREE_LIMITS.preguntasChatPorDia;
-      },
-      registerChatQuestion: () => set((s) => ({ chatHoy: s.chatHoy + 1 })),
+      canStartFreeAnalysis: () => get().planTier !== 'free' || get().analisisTotal < FREE_LIMITS.analisisGratisTotal,
+      registerFreeAnalysis: () => set((s) => ({ analisisTotal: s.analisisTotal + 1 })),
+      canAskChat: () => get().planTier !== 'free' || get().chatTotal < FREE_LIMITS.preguntasChatGratisTotal,
+      registerChatQuestion: () => set((s) => ({ chatTotal: s.chatTotal + 1 })),
 
       addAnalysis: (result) =>
         set((s) => ({
@@ -289,9 +274,8 @@ export const useAppStore = create<AppState>()(
         subEstado: s.subEstado,
         usoMin: s.usoMin,
         usoTotal: s.usoTotal,
-        analisisHoy: s.analisisHoy,
-        chatHoy: s.chatHoy,
-        lastUsageResetDate: s.lastUsageResetDate,
+        analisisTotal: s.analisisTotal,
+        chatTotal: s.chatTotal,
         analyses: s.analyses,
         veredictos: s.veredictos,
         notif: s.notif,

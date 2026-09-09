@@ -12,7 +12,8 @@ const subs = new Map(); // userId -> { tier, ciclo, subEstado, minUsed, minTotal
 const horses = new Map(); // userId -> Horse[]
 const analyses = new Map(); // id -> analysis record (incluye userId)
 const veredictos = new Map(); // id -> veredicto record (incluye userId)
-const chatDaily = new Map(); // userId -> { date, count }
+const chatDaily = new Map(); // userId -> { date, count } (fair-use de Premium, se resetea a diario)
+const chatLifetime = new Map(); // userId -> count (cupo gratis de por vida, nunca se resetea)
 
 function genId() {
   return crypto.randomBytes(12).toString('hex');
@@ -136,11 +137,15 @@ export const chatUsageDb = {
     if (!rec || rec.date !== today()) return 0;
     return rec.count;
   },
+  async countTotal(userId) {
+    return chatLifetime.get(userId) ?? 0;
+  },
   async increment(userId) {
     const t = today();
     const rec = chatDaily.get(userId);
     const count = rec && rec.date === t ? rec.count + 1 : 1;
     chatDaily.set(userId, { date: t, count });
+    chatLifetime.set(userId, (chatLifetime.get(userId) ?? 0) + 1);
     return count;
   },
 };

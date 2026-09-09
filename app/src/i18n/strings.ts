@@ -33,7 +33,7 @@ export const strings = {
     analizarSesionDesc: 'Sube un vídeo montando y tu entrenador IA te corrige al momento',
     subirVideo: 'Subir vídeo →',
     tuUltimaSesion: 'Tu última sesión',
-    usoDeHoy: 'Uso de hoy',
+    cupoGratisTitulo: 'Tu cupo gratis',
     planGratisMejora: 'Plan gratis · mejora',
     analisisRestantes: 'análisis restantes',
     preguntasChat: 'preguntas al chat',
@@ -83,7 +83,7 @@ export const strings = {
     entrenadorIA: 'Entrenador IA',
     enLinea: '● en línea',
     escribePregunta: 'Escribe tu pregunta…',
-    limiteChatGratis: 'Has usado tus {n} preguntas de hoy en el plan gratis. Pásate a Premium para chatear sin límite con tu entrenador. 🐴',
+    limiteChatGratis: 'Ya usaste tus {n} preguntas gratis (son por cuenta, no se renuevan). Pásate a Premium para chatear sin límite con tu entrenador. 🐴',
 
     // Progreso
     tuProgreso: 'Tu progreso',
@@ -157,7 +157,7 @@ export const strings = {
     disciplinasQuePracticas: 'Disciplinas que practicas',
 
     equusLabPremium: 'Equus Lab Premium',
-    planGratuitoDesc: 'Estás en el plan gratuito: análisis en tu móvil, clips cortos y 1 al día. Mejora para desbloquear todo.',
+    planGratuitoDesc: 'Estás en el plan gratuito: análisis en tu móvil, 1 vídeo y 3 preguntas de chat por cuenta. Mejora para desbloquear todo.',
     usoDeEsteMes: 'Uso de este mes',
     usoAvisoMsg: 'Estás cerca de tu cuota mensual. Compra un pack extra o espera al próximo mes — nunca te cobramos sin avisar.',
     usoNormalMsg: 'Tu plan incluye {min} min de análisis al mes. Se renueva cada mes.',
@@ -217,7 +217,7 @@ export const strings = {
     analizarSesionDesc: 'Upload a video and your AI coach will correct you instantly',
     subirVideo: 'Upload video →',
     tuUltimaSesion: 'Your last session',
-    usoDeHoy: "Today's usage",
+    cupoGratisTitulo: 'Your free quota',
     planGratisMejora: 'Free plan · upgrade',
     analisisRestantes: 'analyses left',
     preguntasChat: 'chat questions',
@@ -262,7 +262,7 @@ export const strings = {
     entrenadorIA: 'AI Coach',
     enLinea: '● online',
     escribePregunta: 'Type your question…',
-    limiteChatGratis: "You've used your {n} questions for today on the free plan. Upgrade to Premium to chat without limits. 🐴",
+    limiteChatGratis: "You've used your {n} free questions (they're per account, and don't renew). Upgrade to Premium to chat without limits. 🐴",
 
     tuProgreso: 'Your progress',
     notaMedia: 'average score',
@@ -329,7 +329,7 @@ export const strings = {
     disciplinasQuePracticas: 'Disciplines you practice',
 
     equusLabPremium: 'Equus Lab Premium',
-    planGratuitoDesc: "You're on the free plan: on-device analysis, short clips, 1 per day. Upgrade to unlock everything.",
+    planGratuitoDesc: "You're on the free plan: on-device analysis, 1 video and 3 chat questions per account. Upgrade to unlock everything.",
     usoDeEsteMes: "This month's usage",
     usoAvisoMsg: "You're close to your monthly quota. Buy an extra pack or wait for next month — we never charge you without warning.",
     usoNormalMsg: 'Your plan includes {min} min of analysis per month. Renews every month.',

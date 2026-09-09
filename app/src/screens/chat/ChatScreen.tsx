@@ -8,7 +8,6 @@ import { useAppStore } from '../../store/useAppStore';
 import { askCoach } from '../../services/chatService';
 import { toneGreeting } from '../../utils/coachTone';
 import { FREE_LIMITS } from '../../types/models';
-import { nextDailyResetLabel } from '../../utils/resetTime';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Chat'>;
@@ -21,7 +20,6 @@ export default function ChatScreen({ navigation }: Props) {
   const rider = useAppStore((s) => s.rider);
   const tone = useAppStore((s) => s.toneSel) ?? 'Cercano';
   const planTier = useAppStore((s) => s.planTier);
-  const chatHoy = useAppStore((s) => s.chatHoy);
   const canAskChat = useAppStore((s) => s.canAskChat);
   const registerChatQuestion = useAppStore((s) => s.registerChatQuestion);
   const lastAnalysis = useAppStore((s) => s.analyses[0]);
@@ -45,8 +43,8 @@ export default function ChatScreen({ navigation }: Props) {
     if (isFree && !canAskChat()) {
       setInput('');
       Alert.alert(
-        'Límite diario alcanzado',
-        `${t('limiteChatGratis', { n: FREE_LIMITS.preguntasChatPorDia })} ${lang === 'en' ? 'Resets' : 'Se renueva'} ${nextDailyResetLabel(lang)}.`,
+        lang === 'en' ? 'Free limit reached' : 'Límite gratis alcanzado',
+        t('limiteChatGratis', { n: FREE_LIMITS.preguntasChatGratisTotal }),
         [
           { text: 'Ahora no', style: 'cancel' },
           { text: 'Ver planes', onPress: () => navigation.navigate('AjustesSuscripcion') },
