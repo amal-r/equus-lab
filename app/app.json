@@ -2,7 +2,7 @@
   "expo": {
     "name": "Equus Lab",
     "slug": "equus-lab",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -11,7 +11,8 @@
       "bundleIdentifier": "com.equuslab.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "buildNumber": "2"
     },
     "android": {
       "package": "com.equuslab.app",
