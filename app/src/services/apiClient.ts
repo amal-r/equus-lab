@@ -15,10 +15,15 @@ export class ApiError extends Error {
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (!API_URL) throw new ApiError('backend_no_configurado', 0, 'no_backend');
   const token = await getToken();
+  // FormData (subida de vídeo, ver analysisService.ts): fetch tiene que poner su
+  // propia cabecera con el boundary multipart -- si forzamos aquí
+  // 'Content-Type: application/json' como con el resto de peticiones, el
+  // backend no sabría dónde empieza y acaba cada campo.
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers ?? {}),
     },

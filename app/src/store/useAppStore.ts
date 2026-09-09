@@ -18,6 +18,10 @@ import {
   Veredicto,
 } from '../types/models';
 import { FREE_LIMITS } from '../types/models';
+import { apiFetch } from '../services/apiClient';
+import { HAS_BACKEND } from '../services/config';
+import { clearToken } from '../services/session';
+import { resetUserIdentity } from '../services/purchases';
 
 function genId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -31,6 +35,11 @@ interface AppState {
 
   hasSession: boolean;
   isDemo: boolean;
+  // Id real del usuario en el backend (solo existe si HAS_BACKEND y se hizo
+  // login/registro de verdad contra /api/auth). Se usa como appUserID de
+  // RevenueCat para que el webhook (ver server/routes/webhooks.js) sepa a
+  // qué cuenta atribuir cada compra.
+  backendUserId: string | null;
 
   rider: RiderProfile;
   horses: Horse[];
@@ -69,8 +78,8 @@ interface AppState {
   setLang: (l: Lang) => void;
   setTone: (t: CoachTone) => void;
 
-  loginWithEmail: (email: string) => void;
-  registerWithEmail: (name: string, email: string) => void;
+  loginWithEmail: (email: string, backendUserId?: string) => void;
+  registerWithEmail: (name: string, email: string, backendUserId?: string) => void;
   enterDemo: () => void;
   logout: () => void;
   deleteAccount: () => void;
@@ -138,6 +147,7 @@ export const useAppStore = create<AppState>()(
 
       hasSession: false,
       isDemo: false,
+      backendUserId: null,
 
       rider: defaultRider,
       horses: defaultHorses,
@@ -173,15 +183,33 @@ export const useAppStore = create<AppState>()(
       setLang: (l) => set({ lang: l }),
       setTone: (t) => set({ toneSel: t }),
 
-      loginWithEmail: (email) => set((s) => ({ hasSession: true, isDemo: false, rider: { ...s.rider, email } })),
-      registerWithEmail: (name, email) =>
-        set((s) => ({ hasSession: true, isDemo: false, rider: { ...s.rider, nombre: name || s.rider.nombre, email } })),
+      loginWithEmail: (email, backendUserId) =>
+        set((s) => ({ hasSession: true, isDemo: false, backendUserId: backendUserId ?? null, rider: { ...s.rider, email } })),
+      registerWithEmail: (name, email, backendUserId) =>
+        set((s) => ({
+          hasSession: true,
+          isDemo: false,
+          backendUserId: backendUserId ?? null,
+          rider: { ...s.rider, nombre: name || s.rider.nombre, email },
+        })),
       enterDemo: () => set((s) => ({ hasSession: true, isDemo: true, rider: { ...s.rider, nombre: s.rider.nombre || 'Demo' } })),
-      logout: () => set({ hasSession: false, isDemo: false, messages: [] }),
-      deleteAccount: () =>
+      logout: () => {
+        void clearToken();
+        void resetUserIdentity();
+        set({ hasSession: false, isDemo: false, backendUserId: null, messages: [] });
+      },
+      deleteAccount: () => {
+        // Mejor esfuerzo: si hay cuenta real en el backend, pedimos borrarla
+        // tambien alli. No bloqueamos el borrado local por si falla la red.
+        if (HAS_BACKEND && get().backendUserId) {
+          void apiFetch('/api/account', { method: 'DELETE' }).catch(() => {});
+        }
+        void clearToken();
+        void resetUserIdentity();
         set({
           hasSession: false,
           isDemo: false,
+          backendUserId: null,
           rider: defaultRider,
           horses: defaultHorses,
           analyses: [],
@@ -193,7 +221,8 @@ export const useAppStore = create<AppState>()(
           usoTotal: 0,
           analisisTotal: 0,
           chatTotal: 0,
-        }),
+        });
+      },
 
       updateRiderProfile: (partial) => set((s) => ({ rider: { ...s.rider, ...partial } })),
       toggleDisciplinaPracticada: (label) =>
@@ -267,6 +296,7 @@ export const useAppStore = create<AppState>()(
         toneSel: s.toneSel,
         hasSession: s.hasSession,
         isDemo: s.isDemo,
+        backendUserId: s.backendUserId,
         rider: s.rider,
         horses: s.horses,
         planTier: s.planTier,

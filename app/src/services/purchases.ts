@@ -21,12 +21,29 @@ const ENTITLEMENT_TO_TIER: Record<string, Exclude<PlanTier, 'free'>> = {
 
 let configured = false;
 
-/** Llamar una vez al arrancar la app (ver App.tsx). No hace nada si no hay claves configuradas. */
-export function configurePurchases(appUserID?: string) {
+/** Llamar una vez al arrancar la app (ver App.tsx), siempre en modo anónimo. No hace nada si no hay claves configuradas. */
+export function configurePurchases() {
   if (configured || !HAS_REVENUECAT) return;
   const apiKey = Platform.OS === 'ios' ? IOS_KEY : ANDROID_KEY;
-  Purchases.configure({ apiKey, appUserID });
+  Purchases.configure({ apiKey });
   configured = true;
+}
+
+/**
+ * Llamar justo después de un login/registro real contra el backend (ver
+ * LoginScreen/RegisterScreen). Cambia la identidad de RevenueCat del id
+ * anónimo al id real de la cuenta, para que server/routes/webhooks.js pueda
+ * atribuir cada compra al usuario correcto.
+ */
+export async function identifyUser(userId: string): Promise<void> {
+  if (!HAS_REVENUECAT) return;
+  await Purchases.logIn(userId);
+}
+
+/** Llamar al cerrar sesión o eliminar la cuenta: vuelve a modo anónimo. */
+export async function resetUserIdentity(): Promise<void> {
+  if (!HAS_REVENUECAT) return;
+  await Purchases.logOut();
 }
 
 export interface ActiveEntitlement {

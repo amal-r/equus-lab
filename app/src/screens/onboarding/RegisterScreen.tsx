@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../../components/ScreenContainer';
@@ -9,9 +9,18 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
+import { apiFetch, ApiError } from '../../services/apiClient';
+import { HAS_BACKEND } from '../../services/config';
+import { setToken } from '../../services/session';
+import { identifyUser } from '../../services/purchases';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Register'>;
+
+interface RegisterResponse {
+  token: string;
+  user: { id: string; name: string; email: string };
+}
 
 export default function RegisterScreen({ navigation }: Props) {
   const { t } = useT();
@@ -20,9 +29,30 @@ export default function RegisterScreen({ navigation }: Props) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const submit = () => {
-    registerWithEmail(name.trim(), email.trim());
+  const submit = async () => {
+    if (!HAS_BACKEND) {
+      registerWithEmail(name.trim(), email.trim());
+      return;
+    }
+    setBusy(true);
+    try {
+      const { token, user } = await apiFetch<RegisterResponse>('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), password: pass }),
+      });
+      await setToken(token);
+      registerWithEmail(user.name, user.email, user.id);
+      void identifyUser(user.id);
+    } catch (err) {
+      Alert.alert(
+        'No se pudo crear la cuenta',
+        err instanceof ApiError && err.code === 'email_en_uso' ? 'Ese correo ya está en uso.' : 'Revisa los datos e inténtalo de nuevo.'
+      );
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -39,7 +69,7 @@ export default function RegisterScreen({ navigation }: Props) {
           autoCapitalize="none"
         />
         <FormField label={t('pass')} value={pass} onChangeText={setPass} placeholder={t('passMinima')} secureTextEntry />
-        <PrimaryButton label={t('crear')} onPress={submit} style={{ marginTop: 6, marginBottom: 16 }} />
+        <PrimaryButton label={t('crear')} onPress={submit} loading={busy} style={{ marginTop: 6, marginBottom: 16 }} />
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 4 }}>
           <Text style={{ fontSize: 12.5, color: colors.m55 }}>{t('yaCuenta')}</Text>
           <Pressable onPress={() => navigation.navigate('Login')}>

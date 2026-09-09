@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScreenContainer } from '../../components/ScreenContainer';
@@ -9,9 +9,18 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
+import { apiFetch, ApiError } from '../../services/apiClient';
+import { HAS_BACKEND } from '../../services/config';
+import { setToken } from '../../services/session';
+import { identifyUser } from '../../services/purchases';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+
+interface LoginResponse {
+  token: string;
+  user: { id: string; name: string; email: string };
+}
 
 export default function LoginScreen({ navigation }: Props) {
   const { t } = useT();
@@ -19,9 +28,27 @@ export default function LoginScreen({ navigation }: Props) {
   const loginWithEmail = useAppStore((s) => s.loginWithEmail);
   const [email, setEmail] = useState('');
   const [pass, setPass] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const submit = () => {
-    loginWithEmail(email.trim());
+  const submit = async () => {
+    if (!HAS_BACKEND) {
+      loginWithEmail(email.trim());
+      return;
+    }
+    setBusy(true);
+    try {
+      const { token, user } = await apiFetch<LoginResponse>('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: email.trim(), password: pass }),
+      });
+      await setToken(token);
+      loginWithEmail(user.email, user.id);
+      void identifyUser(user.id);
+    } catch (err) {
+      Alert.alert('No se pudo iniciar sesión', err instanceof ApiError ? 'Revisa tu correo y contraseña.' : 'Inténtalo de nuevo en unos minutos.');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -40,7 +67,7 @@ export default function LoginScreen({ navigation }: Props) {
         <Pressable onPress={() => navigation.navigate('Forgot')} style={{ marginBottom: 22 }}>
           <Text style={{ color: colors.accent, fontSize: 12.5, fontWeight: '700' }}>{t('olvidar')}</Text>
         </Pressable>
-        <PrimaryButton label={t('entrar')} onPress={submit} style={{ marginBottom: 16 }} />
+        <PrimaryButton label={t('entrar')} onPress={submit} loading={busy} style={{ marginBottom: 16 }} />
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 4 }}>
           <Text style={{ fontSize: 12.5, color: colors.m55 }}>{t('sinCuenta')}</Text>
           <Pressable onPress={() => navigation.navigate('Register')}>

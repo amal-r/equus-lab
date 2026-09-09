@@ -32,6 +32,9 @@ export default function App() {
 
   React.useEffect(() => {
     // No hace nada si no hay claves de RevenueCat configuradas (ver .env.example).
+    // Se configura siempre en modo anonimo al arrancar; login/registro real
+    // luego llama a identifyUser() (ver services/purchases.ts) para que
+    // RevenueCat pase a identificar al usuario con su id real del backend.
     configurePurchases();
   }, []);
 

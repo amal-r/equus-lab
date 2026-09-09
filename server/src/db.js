@@ -1,151 +1,182 @@
 /**
- * "Base de datos" en memoria para desarrollo. Se pierde al reiniciar el proceso
- * a propósito: es el punto de reemplazo por Postgres/Supabase en producción
- * (ver README §Backend → "Pasar a una base de datos real"). Todas las funciones
- * son async para que el cambio a un cliente SQL real no obligue a tocar las rutas.
+ * Postgres real (antes: Maps en memoria, ver historial). Todas las funciones
+ * siguen siendo async con la MISMA firma que antes a propósito: las rutas
+ * (analyses.js, chat.js, horses.js, shows.js, subscription.js, webhooks.js,
+ * middleware/auth.js) no necesitan cambiar nada, solo este fichero.
+ *
+ * Requiere DATABASE_URL en el entorno. Ejecuta `node scripts/migrate.js` una
+ * vez contra esa base de datos antes del primer arranque (crea las tablas si
+ * no existen).
  */
 import crypto from 'node:crypto';
+import pg from 'pg';
 
-const users = new Map(); // id -> { id, name, email, passwordHash }
-const usersByEmail = new Map(); // email -> id
-const subs = new Map(); // userId -> { tier, ciclo, subEstado, minUsed, minTotal, validUntil }
-const horses = new Map(); // userId -> Horse[]
-const analyses = new Map(); // id -> analysis record (incluye userId)
-const veredictos = new Map(); // id -> veredicto record (incluye userId)
-const chatDaily = new Map(); // userId -> { date, count } (fair-use de Premium, se resetea a diario)
-const chatLifetime = new Map(); // userId -> count (cupo gratis de por vida, nunca se resetea)
+if (!process.env.DATABASE_URL) {
+  throw new Error('Falta DATABASE_URL en el entorno (Postgres). Ver README §Backend.');
+}
+
+export const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL.includes('localhost') ? false : { rejectUnauthorized: false },
+});
 
 function genId() {
   return crypto.randomBytes(12).toString('hex');
 }
-function today() {
+function todayDate() {
   return new Date().toISOString().slice(0, 10);
+}
+function toDateStr(d) {
+  if (!d) return null;
+  return d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10);
+}
+
+function mapUser(row) {
+  return { id: row.id, name: row.name, email: row.email, passwordHash: row.password_hash, createdAt: row.created_at?.toISOString() };
 }
 
 export const usersDb = {
   async create({ name, email, passwordHash }) {
-    if (usersByEmail.has(email)) throw Object.assign(new Error('email_en_uso'), { status: 409 });
     const id = genId();
-    const user = { id, name, email, passwordHash, createdAt: new Date().toISOString() };
-    users.set(id, user);
-    usersByEmail.set(email, id);
-    subs.set(id, { tier: 'free', ciclo: 'mensual', subEstado: 'gratis', minUsed: 0, minTotal: 0, validUntil: null });
-    horses.set(id, []);
-    return user;
+    try {
+      await pool.query('BEGIN');
+      const { rows } = await pool.query(
+        'INSERT INTO users (id, name, email, password_hash) VALUES ($1,$2,$3,$4) RETURNING *',
+        [id, name, email, passwordHash]
+      );
+      await pool.query('INSERT INTO subscriptions (user_id) VALUES ($1)', [id]);
+      await pool.query('COMMIT');
+      return mapUser(rows[0]);
+    } catch (err) {
+      await pool.query('ROLLBACK');
+      if (err.code === '23505') throw Object.assign(new Error('email_en_uso'), { status: 409 });
+      throw err;
+    }
   },
   async findByEmail(email) {
-    const id = usersByEmail.get(email);
-    return id ? users.get(id) : null;
+    const { rows } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    return rows[0] ? mapUser(rows[0]) : null;
   },
   async findById(id) {
-    return users.get(id) ?? null;
+    const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    return rows[0] ? mapUser(rows[0]) : null;
   },
   async remove(id) {
-    const user = users.get(id);
-    if (!user) return;
-    usersByEmail.delete(user.email);
-    users.delete(id);
-    subs.delete(id);
-    horses.delete(id);
-    for (const [aid, a] of analyses) if (a.userId === id) analyses.delete(aid);
-    for (const [vid, v] of veredictos) if (v.userId === id) veredictos.delete(vid);
-    chatDaily.delete(id);
+    // ON DELETE CASCADE en el resto de tablas se lleva subscriptions/horses/
+    // analyses/veredictos/chat_usage de este usuario.
+    await pool.query('DELETE FROM users WHERE id = $1', [id]);
   },
 };
 
+const DEFAULT_SUB = { tier: 'free', ciclo: 'mensual', subEstado: 'gratis', minUsed: 0, minTotal: 0, validUntil: null };
+
+function mapSub(row) {
+  return {
+    tier: row.tier,
+    ciclo: row.ciclo,
+    subEstado: row.sub_estado,
+    minUsed: Number(row.min_used),
+    minTotal: Number(row.min_total),
+    validUntil: row.valid_until ? row.valid_until.toISOString() : null,
+  };
+}
+
 export const subsDb = {
   async get(userId) {
-    return subs.get(userId) ?? { tier: 'free', ciclo: 'mensual', subEstado: 'gratis', minUsed: 0, minTotal: 0, validUntil: null };
+    const { rows } = await pool.query('SELECT * FROM subscriptions WHERE user_id = $1', [userId]);
+    return rows[0] ? mapSub(rows[0]) : { ...DEFAULT_SUB };
   },
   async set(userId, partial) {
-    const cur = await this.get(userId);
-    const next = { ...cur, ...partial };
-    subs.set(userId, next);
+    const next = { ...(await this.get(userId)), ...partial };
+    await pool.query(
+      `INSERT INTO subscriptions (user_id, tier, ciclo, sub_estado, min_used, min_total, valid_until)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (user_id) DO UPDATE SET
+         tier = $2, ciclo = $3, sub_estado = $4, min_used = $5, min_total = $6, valid_until = $7`,
+      [userId, next.tier, next.ciclo, next.subEstado, next.minUsed, next.minTotal, next.validUntil]
+    );
     return next;
   },
   async addMinutes(userId, min) {
     const cur = await this.get(userId);
-    const next = { ...cur, minUsed: cur.minUsed + min };
-    subs.set(userId, next);
-    return next;
+    return this.set(userId, { minUsed: cur.minUsed + min });
   },
 };
 
 export const horsesDb = {
   async list(userId) {
-    return horses.get(userId) ?? [];
+    const { rows } = await pool.query('SELECT id, data FROM horses WHERE user_id = $1 ORDER BY id', [userId]);
+    return rows.map((r) => ({ id: r.id, ...r.data }));
   },
   async add(userId, horse) {
-    const list = horses.get(userId) ?? [];
-    const record = { id: genId(), sesiones: 0, ...horse };
-    list.push(record);
-    horses.set(userId, list);
-    return record;
+    const id = genId();
+    const record = { sesiones: 0, ...horse };
+    await pool.query('INSERT INTO horses (id, user_id, data) VALUES ($1,$2,$3)', [id, userId, record]);
+    return { id, ...record };
   },
   async update(userId, id, partial) {
-    const list = horses.get(userId) ?? [];
-    const idx = list.findIndex((h) => h.id === id);
-    if (idx === -1) throw Object.assign(new Error('caballo_no_encontrado'), { status: 404 });
-    list[idx] = { ...list[idx], ...partial };
-    return list[idx];
+    const { rows } = await pool.query('SELECT data FROM horses WHERE id = $1 AND user_id = $2', [id, userId]);
+    if (!rows[0]) throw Object.assign(new Error('caballo_no_encontrado'), { status: 404 });
+    const next = { ...rows[0].data, ...partial };
+    await pool.query('UPDATE horses SET data = $1 WHERE id = $2 AND user_id = $3', [next, id, userId]);
+    return { id, ...next };
   },
   async remove(userId, id) {
-    const list = horses.get(userId) ?? [];
-    horses.set(
-      userId,
-      list.filter((h) => h.id !== id)
-    );
+    await pool.query('DELETE FROM horses WHERE id = $1 AND user_id = $2', [id, userId]);
   },
 };
 
 export const analysesDb = {
   async create(userId, data) {
     const id = genId();
-    const record = { id, userId, fecha: new Date().toISOString(), ...data };
-    analyses.set(id, record);
-    return record;
+    const { rows } = await pool.query('INSERT INTO analyses (id, user_id, data) VALUES ($1,$2,$3) RETURNING fecha', [id, userId, data]);
+    return { id, userId, fecha: rows[0].fecha.toISOString(), ...data };
   },
   async get(userId, id) {
-    const record = analyses.get(id);
-    if (!record || record.userId !== userId) return null;
-    return record;
+    const { rows } = await pool.query('SELECT id, user_id, fecha, data FROM analyses WHERE id = $1 AND user_id = $2', [id, userId]);
+    if (!rows[0]) return null;
+    return { id: rows[0].id, userId: rows[0].user_id, fecha: rows[0].fecha.toISOString(), ...rows[0].data };
   },
   async listByUser(userId) {
-    return Array.from(analyses.values())
-      .filter((a) => a.userId === userId)
-      .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    const { rows } = await pool.query('SELECT id, user_id, fecha, data FROM analyses WHERE user_id = $1 ORDER BY fecha DESC', [userId]);
+    return rows.map((r) => ({ id: r.id, userId: r.user_id, fecha: r.fecha.toISOString(), ...r.data }));
   },
 };
 
 export const veredictosDb = {
   async create(userId, data) {
     const id = genId();
-    const record = { id, userId, fecha: new Date().toISOString(), ...data };
-    veredictos.set(id, record);
-    return record;
+    const { rows } = await pool.query('INSERT INTO veredictos (id, user_id, data) VALUES ($1,$2,$3) RETURNING fecha', [id, userId, data]);
+    return { id, userId, fecha: rows[0].fecha.toISOString(), ...data };
   },
   async listByUser(userId) {
-    return Array.from(veredictos.values())
-      .filter((v) => v.userId === userId)
-      .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+    const { rows } = await pool.query('SELECT id, user_id, fecha, data FROM veredictos WHERE user_id = $1 ORDER BY fecha DESC', [userId]);
+    return rows.map((r) => ({ id: r.id, userId: r.user_id, fecha: r.fecha.toISOString(), ...r.data }));
   },
 };
 
 export const chatUsageDb = {
   async countToday(userId) {
-    const rec = chatDaily.get(userId);
-    if (!rec || rec.date !== today()) return 0;
-    return rec.count;
+    const { rows } = await pool.query('SELECT daily_date, daily_count FROM chat_usage WHERE user_id = $1', [userId]);
+    const row = rows[0];
+    if (!row || toDateStr(row.daily_date) !== todayDate()) return 0;
+    return row.daily_count;
   },
   async countTotal(userId) {
-    return chatLifetime.get(userId) ?? 0;
+    const { rows } = await pool.query('SELECT lifetime_count FROM chat_usage WHERE user_id = $1', [userId]);
+    return rows[0]?.lifetime_count ?? 0;
   },
   async increment(userId) {
-    const t = today();
-    const rec = chatDaily.get(userId);
-    const count = rec && rec.date === t ? rec.count + 1 : 1;
-    chatDaily.set(userId, { date: t, count });
-    chatLifetime.set(userId, (chatLifetime.get(userId) ?? 0) + 1);
-    return count;
+    const t = todayDate();
+    const { rows } = await pool.query('SELECT daily_date, daily_count, lifetime_count FROM chat_usage WHERE user_id = $1', [userId]);
+    const row = rows[0];
+    const dailyCount = row && toDateStr(row.daily_date) === t ? row.daily_count + 1 : 1;
+    const lifetimeCount = (row?.lifetime_count ?? 0) + 1;
+    await pool.query(
+      `INSERT INTO chat_usage (user_id, daily_date, daily_count, lifetime_count) VALUES ($1,$2,$3,$4)
+       ON CONFLICT (user_id) DO UPDATE SET daily_date = $2, daily_count = $3, lifetime_count = $4`,
+      [userId, t, dailyCount, lifetimeCount]
+    );
+    return dailyCount;
   },
 };
