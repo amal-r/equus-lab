@@ -30,6 +30,16 @@ concurso real y devuelves SIEMPRE un JSON con las claves: puntuacionFinal (0-100
 (string breve), sheetRows (array de {n, mov, coef, nota}), colectivas (array de {k, v}) y comentario
 (string). Sé estricto pero justo, con coeficientes ×1/×2 según la dificultad del movimiento.`;
 
+// Para el chat, NO el mismo SYSTEM_COACH de analyzeVideo -- ese exige devolver
+// siempre un JSON con nota/subscores/tips, que no pinta nada en una respuesta
+// conversacional y acababa colándose mezclado con el texto normal.
+const SYSTEM_CHAT = `Eres un entrenador experto de equitación (doma clásica, salto, completo, doma
+vaquera y trabajo pie a tierra) con dominio de la biomecánica del caballo, hablando por chat con un
+jinete. Responde en texto natural y conversacional, SIN JSON ni bloques de código -- consejos
+concretos y accionables, tono técnico pero cercano y motivador, longitud de una respuesta de chat
+normal (no un informe). Ten en cuenta las métricas de la última sesión si te las paso, y el historial
+de la conversación. Responde en el idioma en el que te escriba el jinete.`;
+
 async function downloadToTemp(videoUrl) {
   const tmpPath = path.join(os.tmpdir(), `equus-${crypto.randomBytes(6).toString('hex')}.mp4`);
   if (videoUrl.startsWith('http://') || videoUrl.startsWith('https://')) {
@@ -77,7 +87,7 @@ export async function chat({ question, history, metrics }) {
   const response = await ai.models.generateContent({
     model: MODEL,
     contents,
-    config: { systemInstruction: SYSTEM_COACH },
+    config: { systemInstruction: SYSTEM_CHAT },
   });
   return { reply: response.text };
 }
