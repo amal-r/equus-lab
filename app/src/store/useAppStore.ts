@@ -78,11 +78,13 @@ interface AppState {
   setLang: (l: Lang) => void;
   setTone: (t: CoachTone) => void;
 
-  loginWithEmail: (email: string, backendUserId?: string) => void;
-  registerWithEmail: (name: string, email: string, backendUserId?: string) => void;
+  loginWithEmail: (email: string) => void;
+  registerWithEmail: (name: string, email: string) => void;
   enterDemo: () => void;
   logout: () => void;
   deleteAccount: () => void;
+  /** Se llama solo al confirmar una compra real (ver AjustesSuscripcionScreen). */
+  setBackendUserId: (id: string) => void;
 
   updateRiderProfile: (partial: Partial<RiderProfile>) => void;
   toggleDisciplinaPracticada: (label: string) => void;
@@ -183,15 +185,10 @@ export const useAppStore = create<AppState>()(
       setLang: (l) => set({ lang: l }),
       setTone: (t) => set({ toneSel: t }),
 
-      loginWithEmail: (email, backendUserId) =>
-        set((s) => ({ hasSession: true, isDemo: false, backendUserId: backendUserId ?? null, rider: { ...s.rider, email } })),
-      registerWithEmail: (name, email, backendUserId) =>
-        set((s) => ({
-          hasSession: true,
-          isDemo: false,
-          backendUserId: backendUserId ?? null,
-          rider: { ...s.rider, nombre: name || s.rider.nombre, email },
-        })),
+      loginWithEmail: (email) => set((s) => ({ hasSession: true, isDemo: false, rider: { ...s.rider, email } })),
+      registerWithEmail: (name, email) =>
+        set((s) => ({ hasSession: true, isDemo: false, rider: { ...s.rider, nombre: name || s.rider.nombre, email } })),
+      setBackendUserId: (id) => set({ backendUserId: id }),
       enterDemo: () => set((s) => ({ hasSession: true, isDemo: true, rider: { ...s.rider, nombre: s.rider.nombre || 'Demo' } })),
       logout: () => {
         void clearToken();

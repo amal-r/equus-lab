@@ -14,6 +14,7 @@ import { PLAN_DEFS, PlanTier } from '../../types/models';
 import {
   HAS_REVENUECAT,
   getOfferings,
+  identifyUser,
   openManageSubscriptions,
   productIdFor,
   purchase,
@@ -22,6 +23,8 @@ import {
   tierFromCustomerInfo,
 } from '../../services/purchases';
 import { notifyBackendOfExtraPack, notifyBackendOfPurchase } from '../../services/subscriptionService';
+import { ensureBackendAccount } from '../../services/backendAccount';
+import { HAS_BACKEND } from '../../services/config';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AjustesSuscripcion'>;
@@ -56,6 +59,9 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
   const usoMin = useAppStore((s) => s.usoMin);
   const usoTotal = useAppStore((s) => s.usoTotal);
   const subscribe = useAppStore((s) => s.subscribe);
+  const rider = useAppStore((s) => s.rider);
+  const backendUserId = useAppStore((s) => s.backendUserId);
+  const setBackendUserId = useAppStore((s) => s.setBackendUserId);
   const cancelSubscription = useAppStore((s) => s.cancelSubscription);
   const reactivateSubscription = useAppStore((s) => s.reactivateSubscription);
   const buyExtraPack = useAppStore((s) => s.buyExtraPack);
@@ -126,6 +132,18 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
     }
     setBusy('purchase');
     try {
+      // La cuenta en el backend se crea AQUI, la primera vez que se compra --
+      // nunca antes (ver ensureBackendAccount). identifyUser() tiene que
+      // pasar ANTES de purchase(): si no, RevenueCat registra la compra bajo
+      // el id anonimo previo y el backend nunca sabria a que cuenta atribuirla.
+      let uid = backendUserId;
+      if (!uid && HAS_BACKEND) {
+        uid = await ensureBackendAccount(rider);
+        if (uid) {
+          setBackendUserId(uid);
+          await identifyUser(uid);
+        }
+      }
       const info = await purchase(pkg);
       const ent = tierFromCustomerInfo(info);
       if (ent) {
@@ -148,11 +166,25 @@ export default function AjustesSuscripcionScreen({ navigation }: Props) {
     }
     setBusy('restore');
     try {
+      // Al contrario que en handleSubscribe: aqui restauramos PRIMERO (con la
+      // identidad que hubiera, normalmente anonima) y solo si de verdad
+      // encuentra algo activo creamos la cuenta -- si no hay nada que
+      // restaurar, no queremos generar una cuenta de la nada. identifyUser()
+      // despues fusiona en el backend el historico anonimo dentro de uid, asi
+      // que a notifyBackendOfPurchase le pasamos uid, no el id anonimo previo.
       const info = await restore();
       const ent = tierFromCustomerInfo(info);
       if (ent) {
+        let uid = backendUserId;
+        if (!uid && HAS_BACKEND) {
+          uid = await ensureBackendAccount(rider);
+          if (uid) {
+            setBackendUserId(uid);
+            await identifyUser(uid);
+          }
+        }
         subscribe(ent.tier);
-        void notifyBackendOfPurchase(info.originalAppUserId);
+        void notifyBackendOfPurchase(uid ?? info.originalAppUserId);
         Alert.alert('Compra restaurada', `Tienes ${PLAN_DEFS[ent.tier].nombre} activo.`);
       } else {
         Alert.alert('Nada que restaurar', 'No encontramos ninguna suscripción activa para tu cuenta de la tienda.');
