@@ -1,6 +1,7 @@
 import { apiFetch, ApiError } from './apiClient';
 import { HAS_BACKEND } from './config';
 import { setToken } from './session';
+import { identifyUser } from './purchases';
 import { RiderProfile } from '../types/models';
 
 interface RegisterResponse {
@@ -38,5 +39,26 @@ export async function ensureBackendAccount(rider: RiderProfile): Promise<string 
     // adelante -- el entitlement real vive en RevenueCat, no aquí.
     if (err instanceof ApiError) return null;
     throw err;
+  }
+}
+
+/**
+ * Red de seguridad para cuentas que ya eran Premium ANTES de que existiera
+ * ensureBackendAccount (p.ej. compraron en una build anterior a este cambio):
+ * sin esto se quedarian con planTier != 'free' pero sin backendUserId ni
+ * token, y cualquier llamada al backend (chat, analisis) fallaria con 401 en
+ * silencio. Se llama justo antes de usar una funcion Premium que necesite el
+ * backend -- si ya hay backendUserId, no hace nada.
+ */
+export async function ensurePremiumIdentity(
+  rider: RiderProfile,
+  backendUserId: string | null,
+  setBackendUserId: (id: string) => void
+): Promise<void> {
+  if (backendUserId || !HAS_BACKEND) return;
+  const uid = await ensureBackendAccount(rider);
+  if (uid) {
+    setBackendUserId(uid);
+    await identifyUser(uid);
   }
 }

@@ -6,6 +6,7 @@ import { ProgressRing } from '../../components/ProgressRing';
 import { useT } from '../../i18n/useT';
 import { useAppStore } from '../../store/useAppStore';
 import { runAnalysis } from '../../services/analysisService';
+import { ensurePremiumIdentity } from '../../services/backendAccount';
 import { ProgressEvent } from '../../ondevice/analyzeClip';
 import type { RootStackParamList } from '../../navigation/types';
 
@@ -23,6 +24,9 @@ export default function ProcesandoScreen({ navigation }: Props) {
   const registerFreeAnalysis = useAppStore((s) => s.registerFreeAnalysis);
   const addAnalysis = useAppStore((s) => s.addAnalysis);
   const clearVideo = useAppStore((s) => s.clearVideo);
+  const rider = useAppStore((s) => s.rider);
+  const backendUserId = useAppStore((s) => s.backendUserId);
+  const setBackendUserId = useAppStore((s) => s.setBackendUserId);
 
   const [progress, setProgress] = useState<ProgressEvent>({ pct: 0, step: 0, pointCount: 0, strideCount: 0 });
   const startedRef = useRef(false);
@@ -35,6 +39,9 @@ export default function ProcesandoScreen({ navigation }: Props) {
     const isPremium = planTier !== 'free';
 
     (async () => {
+      // Red de seguridad para quien ya era Premium antes de que el backend
+      // creara la cuenta al comprar (ver ensurePremiumIdentity).
+      if (isPremium) await ensurePremiumIdentity(rider, backendUserId, setBackendUserId);
       const result = await runAnalysis(
         {
           uri: videoUri ?? 'demo',

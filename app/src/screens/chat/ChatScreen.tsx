@@ -6,6 +6,7 @@ import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
 import { askCoach } from '../../services/chatService';
+import { ensurePremiumIdentity } from '../../services/backendAccount';
 import { toneGreeting } from '../../utils/coachTone';
 import { FREE_LIMITS } from '../../types/models';
 import type { RootStackParamList } from '../../navigation/types';
@@ -23,6 +24,8 @@ export default function ChatScreen({ navigation }: Props) {
   const canAskChat = useAppStore((s) => s.canAskChat);
   const registerChatQuestion = useAppStore((s) => s.registerChatQuestion);
   const lastAnalysis = useAppStore((s) => s.analyses[0]);
+  const backendUserId = useAppStore((s) => s.backendUserId);
+  const setBackendUserId = useAppStore((s) => s.setBackendUserId);
 
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -57,6 +60,9 @@ export default function ChatScreen({ navigation }: Props) {
     setInput('');
     setSending(true);
     try {
+      // Red de seguridad para quien ya era Premium antes de que el backend
+      // creara la cuenta al comprar (ver ensurePremiumIdentity).
+      if (!isFree) await ensurePremiumIdentity(rider, backendUserId, setBackendUserId);
       const reply = await askCoach(trimmed, !isFree, messages, {
         esPieATierra: lastAnalysis?.esPieATierra,
         disciplina: lastAnalysis?.disciplina,
