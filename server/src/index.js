@@ -16,6 +16,11 @@ import { aiProviderName } from './ai/index.js';
 
 const app = express();
 
+// Railway (y la mayoria de hostings) ponen la app detras de un proxy/balanceador
+// que anade X-Forwarded-For. Sin esto, express-rate-limit rechaza la peticion
+// entera por seguridad (no puede fiarse de la IP) en vez de limitar sin mas.
+app.set('trust proxy', 1);
+
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
 app.use(express.json({ limit: '1mb' }));
 app.use('/api', apiRateLimit);

@@ -63,6 +63,16 @@ export default function ChatScreen({ navigation }: Props) {
         ejercicio: lastAnalysis?.ejercicio,
       });
       addChatMessage({ role: 'coach', text: reply });
+    } catch {
+      // Si el backend falla (red, IA caida, etc.), que se note en el propio
+      // chat en vez de quedarse sin responder sin más explicación.
+      addChatMessage({
+        role: 'coach',
+        text:
+          lang === 'en'
+            ? "Sorry, I couldn't answer that just now. Try again in a moment."
+            : 'Perdona, no he podido responder ahora mismo. Inténtalo de nuevo en un momento.',
+      });
     } finally {
       setSending(false);
     }
