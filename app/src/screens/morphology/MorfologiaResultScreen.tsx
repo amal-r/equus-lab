@@ -30,6 +30,8 @@ const REF_COLOR: Record<string, string> = { 'en rango': '#6a9450', 'algo cerrado
 export default function MorfologiaResultScreen({ navigation, route }: Props) {
   const { colors, radius } = useTheme();
   const scan = useAppStore((s) => s.scans.find((sc) => sc.id === route.params.scanId));
+  const planTier = useAppStore((s) => s.planTier);
+  const showPremiumTeaser = planTier === 'free' && scan?.origen === 'ondevice';
 
   if (!scan) {
     return (
@@ -55,6 +57,24 @@ export default function MorfologiaResultScreen({ navigation, route }: Props) {
           <Text style={{ fontSize: 40, fontWeight: '800', color: '#fff' }}>{scan.indice.toFixed(1).replace('.', ',')}</Text>
           <Text style={{ fontSize: 12.5, lineHeight: 17, color: 'rgba(255,255,255,0.96)', flex: 1 }}>{scan.resumen}</Text>
         </View>
+
+        {showPremiumTeaser && (
+          <Pressable
+            onPress={() => navigation.navigate('AjustesSuscripcion')}
+            style={{ backgroundColor: '#26221d', borderRadius: 16, padding: 16, marginBottom: 18, flexDirection: 'row', gap: 12, alignItems: 'center' }}
+          >
+            <Text style={{ fontSize: 22 }}>🔍</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: '#faf7f2', fontWeight: '800', fontSize: 12.5, marginBottom: 3 }}>
+                Este escaneo no es 100% fiable
+              </Text>
+              <Text style={{ color: 'rgba(250,247,242,0.8)', fontSize: 12, lineHeight: 17 }}>
+                Es la versión gratis, on-device, sin IA real analizando tus fotos. Con Premium, Gemini analiza las
+                fotos de verdad y el informe es fiable. Ver planes →
+              </Text>
+            </View>
+          </Pressable>
+        )}
 
         <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink, marginBottom: 11 }}>Mapa muscular</Text>
         <View style={{ borderRadius: radius.xl, overflow: 'hidden', backgroundColor: colors.ph, height: 220, marginBottom: 12 }}>

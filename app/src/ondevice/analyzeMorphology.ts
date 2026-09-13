@@ -47,10 +47,14 @@ function mulberry32(seed: number) {
 
 const ZONA_LABELS = ['Dorso / lomo', 'Grupa izquierda', 'Grupa derecha', 'Cuello / trapecio', 'Pectoral / antebrazo'];
 
-const ZONA_NOTAS: Record<'correcto' | 'debil' | 'atrofia', string[]> = {
+// El plan gratis nunca genera "atrofia" ni sugiere revisión veterinaria: es un
+// generador aleatorio sin lectura real de la foto, y esa es una afirmación
+// demasiado seria sobre el caballo real de alguien para basarla en un hash.
+// Esa escalada queda reservada al análisis real (Premium/Gemini) -- ver
+// geminiProvider.js. Aquí el peor estado posible es "debil".
+const ZONA_NOTAS: Record<'correcto' | 'debil', string[]> = {
   correcto: ['Desarrollo homogéneo, sin diferencias reseñables.', 'Buen tono muscular para el trabajo habitual.'],
   debil: ['Algo menos de masa que en el resto del cuerpo — vigilar en próximos escaneos.', 'Tono discreto, mejorable con trabajo específico.'],
-  atrofia: ['Bastante menos masa que en la zona simétrica — conviene revisión veterinaria.', 'Diferencia marcada respecto al lado opuesto.'],
 };
 
 // Las de "cm" dependen de tener una escala real (vara o alzada de ficha) --
@@ -83,9 +87,8 @@ export async function analyzeMorphology(input: AnalyzeMorphologyInput): Promise<
   const rand = mulberry32(seed);
 
   const zonas: MorphZona[] = ZONA_LABELS.map((zona) => {
-    const roll = rand();
-    const estado: MorphZona['estado'] = roll > 0.82 ? 'atrofia' : roll > 0.55 ? 'debil' : 'correcto';
-    const pct = Math.round((estado === 'correcto' ? 78 + rand() * 18 : estado === 'debil' ? 55 + rand() * 20 : 30 + rand() * 20));
+    const estado: MorphZona['estado'] = rand() > 0.55 ? 'debil' : 'correcto';
+    const pct = Math.round(estado === 'correcto' ? 78 + rand() * 18 : 55 + rand() * 20);
     const notas = ZONA_NOTAS[estado];
     return { zona, estado, pct, nota: notas[Math.floor(rand() * notas.length)] };
   });
@@ -102,22 +105,19 @@ export async function analyzeMorphology(input: AnalyzeMorphologyInput): Promise<
     return { label: def.label, valor: `${prefijo}${valor} ${def.unidad}`, ref: refFor(def.label, delta) };
   });
 
-  const nAtrofias = zonas.filter((z) => z.estado === 'atrofia').length;
   const nDebiles = zonas.filter((z) => z.estado === 'debil').length;
-  const indice = Math.round(Math.max(3, Math.min(9.5, 8.4 - nAtrofias * 1.3 - nDebiles * 0.5 - rand() * 0.4)) * 10) / 10;
+  const indice = Math.round(Math.max(4, Math.min(9.5, 8.4 - nDebiles * 0.5 - rand() * 0.4)) * 10) / 10;
 
   const resumen =
-    nAtrofias > 0
-      ? `Se observa menos desarrollo muscular de lo esperado en ${nAtrofias === 1 ? 'una zona' : `${nAtrofias} zonas`}; el resto del cuerpo está dentro de un desarrollo normal para su morfología.`
-      : nDebiles > 0
+    nDebiles > 0
       ? 'Desarrollo general correcto, con un par de zonas algo por debajo del resto que conviene trabajar.'
       : 'Desarrollo muscular homogéneo y sin asimetrías reseñables en las tres tomas.';
 
+  // Sin alertas de "revisa con un veterinario": esa sugerencia solo tiene
+  // sentido cuando el análisis lee la foto de verdad (Premium/Gemini), no
+  // aquí. Ver PROMPT-CAMARA-Y-AJUSTES.md / la nota de fiabilidad en la
+  // pantalla de resultado para el aviso de que esta versión es orientativa.
   const alertas: string[] = [];
-  const asimetriaGrupa = medidas.find((m) => m.label === 'Simetría de grupa');
-  if (nAtrofias > 0 || asimetriaGrupa?.ref === 'asimetria') {
-    alertas.push('La diferencia detectada entre lados conviene revisarla con un veterinario o fisioterapeuta equino antes de intensificar el trabajo.');
-  }
 
   return {
     id: `${Date.now()}-${Math.floor(rand() * 1e6)}`,
