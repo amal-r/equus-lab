@@ -47,6 +47,10 @@ export default function HomeScreen({ navigation }: Props) {
 
   const ultima = analyses[0];
   const racha = useMemo(() => computeWeekStreak(analyses.map((a) => a.fecha)), [analyses]);
+  const notaMedia = analyses.length ? analyses.reduce((s, a) => s + a.nota, 0) / analyses.length : 0;
+  const objetivoNota = rider.objetivoNota ?? 8;
+  const objetivoDisciplina = rider.objetivoDisciplina ?? 'Doma clásica';
+  const objetivoPct = Math.min(100, Math.max(4, (notaMedia / objetivoNota) * 100));
   const isFree = planTier === 'free';
   const analisisLeft = Math.max(0, FREE_LIMITS.analisisGratisTotal - analisisTotal);
   const chatLeft = Math.max(0, FREE_LIMITS.preguntasChatGratisTotal - chatTotal);
@@ -250,10 +254,10 @@ export default function HomeScreen({ navigation }: Props) {
           <Text style={{ fontSize: 22 }}>🎯</Text>
           <View style={{ flex: 1 }}>
             <Text style={{ fontSize: 12.5, lineHeight: 17, color: '#faf7f2' }}>
-              {t('objetivo')}: <Text style={{ fontWeight: '800' }}>nota media de 8 en doma</Text>
+              {t('objetivo')}: <Text style={{ fontWeight: '800' }}>nota media de {objetivoNota.toString().replace('.', ',')} en {objetivoDisciplina.toLowerCase()}</Text>
             </Text>
             <View style={{ height: 6, backgroundColor: 'rgba(255,255,255,0.18)', borderRadius: 4, marginTop: 8, overflow: 'hidden' }}>
-              <View style={{ width: '74%', height: '100%', backgroundColor: colors.accent, borderRadius: 4 }} />
+              <View style={{ width: `${objetivoPct}%`, height: '100%', backgroundColor: colors.accent, borderRadius: 4 }} />
             </View>
           </View>
         </Pressable>

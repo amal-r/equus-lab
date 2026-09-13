@@ -154,6 +154,8 @@ const defaultRider: RiderProfile = {
   aniosMontando: '9',
   nivel: 'Medio',
   disciplinasPracticadas: { 'Doma clásica': true, Salto: true, Completo: false, 'Doma vaquera': false },
+  objetivoDisciplina: 'Doma clásica',
+  objetivoNota: 8,
 };
 
 const defaultHorses: Horse[] = [

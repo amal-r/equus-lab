@@ -9,6 +9,7 @@ import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
 import { computeWeekStreak } from '../../utils/streak';
+import { computeNivelReal, esNivelSuperior } from '../../utils/nivelReal';
 import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Perfil'>;
@@ -29,11 +30,17 @@ export default function PerfilScreen({ navigation }: Props) {
   const veredictos = useAppStore((s) => s.veredictos);
   const scans = useAppStore((s) => s.scans);
   const deleteHorse = useAppStore((s) => s.deleteHorse);
+  const updateRiderProfile = useAppStore((s) => s.updateRiderProfile);
 
   const racha = useMemo(() => computeWeekStreak(analyses.map((a) => a.fecha)), [analyses]);
   const notaMedia = analyses.length ? analyses.reduce((s, a) => s + a.nota, 0) / analyses.length : 0;
   const maxNota = analyses.length ? Math.max(...analyses.map((a) => a.nota)) : 0;
   const horasAnalizadas = Math.round((analyses.length * 2.5) / 60 * 10) / 10;
+  const objetivoNota = rider.objetivoNota ?? 8;
+  const objetivoDisciplina = rider.objetivoDisciplina ?? 'Doma clásica';
+  const nivelDeclarado = rider.nivel || 'Medio';
+  const nivelReal = useMemo(() => computeNivelReal(notaMedia, analyses.length), [notaMedia, analyses.length]);
+  const sugerirSubirNivel = nivelReal !== null && esNivelSuperior(nivelReal, nivelDeclarado);
 
   const practicadas = Object.entries(rider.disciplinasPracticadas)
     .filter(([, v]) => v)
@@ -157,15 +164,40 @@ export default function PerfilScreen({ navigation }: Props) {
         </View>
 
         <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink, marginBottom: 11 }}>{t('miObjetivo')}</Text>
-        <View style={{ backgroundColor: colors.tint, borderRadius: 18, padding: 16, flexDirection: 'row', gap: 13, alignItems: 'center' }}>
+        {nivelReal !== null && (
+          <View style={{ backgroundColor: colors.surface, borderRadius: 14, padding: 13, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Text style={{ fontSize: 11.5, color: colors.m55, flex: 1 }}>
+              Nivel que dijiste: <Text style={{ fontWeight: '700', color: colors.ink }}>{nivelDeclarado}</Text>
+              {'  ·  '}Nivel real (IA): <Text style={{ fontWeight: '700', color: colors.ink }}>{nivelReal}</Text>{' '}
+              <Text style={{ color: colors.m45 }}>(nota media {notaMedia.toFixed(1).replace('.', ',')})</Text>
+            </Text>
+          </View>
+        )}
+        {sugerirSubirNivel && nivelReal && (
+          <Pressable
+            onPress={() => updateRiderProfile({ nivel: nivelReal })}
+            style={{ backgroundColor: colors.chip, borderRadius: 14, padding: 13, marginBottom: 10, flexDirection: 'row', alignItems: 'center', gap: 10 }}
+          >
+            <Text style={{ fontSize: 11.5, color: colors.accent, flex: 1, fontWeight: '600' }}>
+              Parece que ya vas para {nivelReal}, ¿lo actualizamos?
+            </Text>
+            <Text style={{ fontSize: 11.5, fontWeight: '800', color: colors.accent }}>Sí →</Text>
+          </Pressable>
+        )}
+        <Pressable
+          onPress={() => navigation.navigate('AjustesNivel')}
+          style={{ backgroundColor: colors.tint, borderRadius: 18, padding: 16, flexDirection: 'row', gap: 13, alignItems: 'center' }}
+        >
           <Text style={{ fontSize: 24 }}>🎯</Text>
           <View style={{ flex: 1 }}>
-            <Text style={{ fontWeight: '700', fontSize: 13, color: colors.ink }}>Nota media de 8 en doma</Text>
+            <Text style={{ fontWeight: '700', fontSize: 13, color: colors.ink }}>
+              Nota media de {objetivoNota.toString().replace('.', ',')} en {objetivoDisciplina.toLowerCase()}
+            </Text>
             <View style={{ height: 7, backgroundColor: '#d8e0d0', borderRadius: 4, marginTop: 8, overflow: 'hidden' }}>
-              <View style={{ width: `${Math.min(100, (notaMedia / 8) * 100)}%`, height: '100%', backgroundColor: colors.good, borderRadius: 4 }} />
+              <View style={{ width: `${Math.min(100, Math.max(4, (notaMedia / objetivoNota) * 100))}%`, height: '100%', backgroundColor: colors.good, borderRadius: 4 }} />
             </View>
           </View>
-        </View>
+        </Pressable>
       </ScreenContainer>
       <BottomNav active="perfil" />
     </SafeAreaView>

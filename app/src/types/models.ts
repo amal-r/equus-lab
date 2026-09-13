@@ -32,6 +32,10 @@ export interface RiderProfile {
   nivel: Nivel;
   disciplinasPracticadas: Record<string, boolean>;
   avatarUri?: string;
+  // Objetivo editable (Ajustes > Nivel y disciplinas). Antes era un texto fijo
+  // ("nota media de 8 en doma") igual para todos sin importar su disciplina.
+  objetivoDisciplina?: Disciplina;
+  objetivoNota?: number;
 }
 
 export interface ChatMessage {

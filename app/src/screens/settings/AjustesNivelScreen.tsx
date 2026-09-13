@@ -15,6 +15,7 @@ import type { RootStackParamList } from '../../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamList, 'AjustesNivel'>;
 
 const NIVELES: Nivel[] = ['Iniciación', 'Medio', 'Avanzado'];
+const NOTAS_OBJETIVO = [6.5, 7, 7.5, 8, 8.5, 9, 9.5];
 
 export default function AjustesNivelScreen({ navigation }: Props) {
   const { t } = useT();
@@ -53,6 +54,33 @@ export default function AjustesNivelScreen({ navigation }: Props) {
               if (!rider.disciplinasPracticadas[nombre]) toggleDisciplinaPracticada(nombre);
             }}
           />
+        </View>
+
+        <Text style={{ fontWeight: '800', fontSize: 13, color: colors.ink, marginTop: 26, marginBottom: 10 }}>Tu objetivo</Text>
+        <Text style={{ fontSize: 11.5, color: colors.m50, marginBottom: 14, lineHeight: 16 }}>
+          Se usa en Inicio y en tu perfil para mostrar tu progreso real hacia esa nota.
+        </Text>
+        <Text style={{ fontSize: 11.5, fontWeight: '700', color: colors.m55, marginBottom: 8 }}>Disciplina objetivo</Text>
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+          {[...DISCIPLINAS_BASE, ...customDisciplinas].map((d) => (
+            <Chip
+              key={d}
+              label={d}
+              active={(rider.objetivoDisciplina ?? 'Doma clásica') === d}
+              onPress={() => updateRiderProfile({ objetivoDisciplina: d })}
+            />
+          ))}
+        </View>
+        <Text style={{ fontSize: 11.5, fontWeight: '700', color: colors.m55, marginBottom: 8 }}>Nota objetivo</Text>
+        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+          {NOTAS_OBJETIVO.map((n) => (
+            <Chip
+              key={n}
+              label={n.toString().replace('.', ',')}
+              active={(rider.objetivoNota ?? 8) === n}
+              onPress={() => updateRiderProfile({ objetivoNota: n })}
+            />
+          ))}
         </View>
       </ScreenContainer>
     </SafeAreaView>
