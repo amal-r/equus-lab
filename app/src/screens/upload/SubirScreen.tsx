@@ -13,6 +13,7 @@ import { BottomNav } from '../../components/BottomNav';
 import { useT } from '../../i18n/useT';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
+import { persistPickedFile } from '../../utils/persistMedia';
 import { DISCIPLINAS_BASE, FREE_LIMITS, PLAN_DEFS } from '../../types/models';
 import type { RootStackParamList } from '../../navigation/types';
 
@@ -72,7 +73,11 @@ export default function SubirScreen({ navigation }: Props) {
       if (!result.canceled && result.assets?.[0]) {
         const asset = result.assets[0];
         const durationSec = Math.max(1, Math.round((asset.duration ?? 0) / 1000) || 60);
-        setVideo(asset.uri, asset.fileName ?? 'vídeo', durationSec);
+        // Se copia a almacenamiento persistente porque la URI que da el picker vive en la
+        // caché de la app: se pierde en cuanto se actualiza la app, aunque no se reinstale
+        // (ver persistMedia.ts) -- si no, el vídeo dejaría de verse en el resultado.
+        const persistedUri = await persistPickedFile(asset.uri, 'mp4');
+        setVideo(persistedUri, asset.fileName ?? 'vídeo', durationSec);
       }
     } finally {
       setBusyPicking(false);
