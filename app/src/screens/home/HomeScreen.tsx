@@ -61,32 +61,38 @@ export default function HomeScreen({ navigation }: Props) {
           </View>
           <Pressable
             onPress={() => navigation.navigate('Chat')}
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: 23,
-              backgroundColor: colors.surface,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOpacity: 0.08,
-              shadowRadius: 3,
-            }}
+            accessibilityLabel="Chat con tu entrenador IA"
+            style={{ alignItems: 'center', gap: 4 }}
           >
-            <Text style={{ fontSize: 20 }}>🎓</Text>
             <View
               style={{
-                position: 'absolute',
-                top: 9,
-                right: 9,
-                width: 9,
-                height: 9,
-                borderRadius: 5,
-                backgroundColor: colors.good,
-                borderWidth: 2,
-                borderColor: colors.surface,
+                width: 46,
+                height: 46,
+                borderRadius: 23,
+                backgroundColor: colors.surface,
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOpacity: 0.08,
+                shadowRadius: 3,
               }}
-            />
+            >
+              <Text style={{ fontSize: 20 }}>🎓</Text>
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  width: 9,
+                  height: 9,
+                  borderRadius: 5,
+                  backgroundColor: colors.good,
+                  borderWidth: 2,
+                  borderColor: colors.surface,
+                }}
+              />
+            </View>
+            <Text style={{ fontSize: 10, fontWeight: '700', color: colors.m55 }}>Chat</Text>
           </Pressable>
         </View>
 

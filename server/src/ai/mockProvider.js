@@ -62,7 +62,7 @@ export async function chat({ question, history, metrics }) {
   return { reply: `${replies[idx]} (respuesta simulada — sin GEMINI_API_KEY configurada)` };
 }
 
-export async function analyzeMorphology({ caballo }) {
+export async function analyzeMorphology({ caballo, escala }) {
   const rand = rng(hashSeed(`${caballo}|morfo`));
   const zonas = ['Dorso / lomo', 'Grupa izquierda', 'Grupa derecha', 'Cuello / trapecio', 'Pectoral / antebrazo'].map((zona) => {
     const roll = rand();
@@ -70,14 +70,25 @@ export async function analyzeMorphology({ caballo }) {
     const pct = Math.round(estado === 'correcto' ? 78 + rand() * 18 : estado === 'debil' ? 55 + rand() * 20 : 30 + rand() * 20);
     return { zona, estado, pct, nota: `[simulado] Desarrollo ${estado} en ${zona.toLowerCase()}.` };
   });
+  // Igual que analyzeMorphology.ts (on-device): sin vara ni alzada de ficha no
+  // se inventan centímetros, confianza más baja, y los cm bajos de confianza
+  // se marcan con "±" (ver PROMPT-CAMARA-Y-AJUSTES.md).
+  const confianzaBase = escala === 'vara' ? 0.85 : escala === 'alzada_ficha' ? 0.7 : 0.45;
+  const confianza = Math.round(Math.max(0.3, Math.min(0.95, confianzaBase + (rand() - 0.5) * 0.1)) * 100) / 100;
   const medidas = [
-    { label: 'Alzada a la cruz', unidad: 'cm', base: 158 },
-    { label: 'Longitud escápula–isquion', unidad: 'cm', base: 132 },
-    { label: 'Ángulo de grupa', unidad: '°', base: 24 },
-    { label: 'Ángulo escápula–húmero', unidad: '°', base: 100 },
-    { label: 'Simetría de grupa', unidad: '%', base: 96 },
-    { label: 'Perímetro torácico', unidad: 'cm', base: 182 },
-  ].map((def) => ({ label: def.label, valor: `${Math.round((def.base + (rand() - 0.5) * 10) * 10) / 10} ${def.unidad}`, ref: 'en rango' }));
+    { label: 'Alzada a la cruz', unidad: 'cm', base: 158, requiereEscala: true },
+    { label: 'Longitud escápula–isquion', unidad: 'cm', base: 132, requiereEscala: true },
+    { label: 'Ángulo de grupa', unidad: '°', base: 24, requiereEscala: false },
+    { label: 'Ángulo escápula–húmero', unidad: '°', base: 100, requiereEscala: false },
+    { label: 'Simetría de grupa', unidad: '%', base: 96, requiereEscala: false },
+    { label: 'Perímetro torácico', unidad: 'cm', base: 182, requiereEscala: true },
+  ]
+    .filter((def) => !def.requiereEscala || escala !== 'ninguna')
+    .map((def) => {
+      const valor = Math.round((def.base + (rand() - 0.5) * 10) * 10) / 10;
+      const prefijo = def.requiereEscala && confianza < 0.6 ? '± ' : '';
+      return { label: def.label, valor: `${prefijo}${valor} ${def.unidad}`, ref: 'en rango' };
+    });
   const nAtrofias = zonas.filter((z) => z.estado === 'atrofia').length;
   const indice = Math.round(Math.max(3, Math.min(9.5, 8.4 - nAtrofias * 1.3 - rand() * 0.4)) * 10) / 10;
   return {
@@ -85,6 +96,7 @@ export async function analyzeMorphology({ caballo }) {
     resumen: `Desarrollo general dentro de lo esperado para ${caballo} (respuesta simulada — sin GEMINI_API_KEY configurada).`,
     zonas,
     medidas,
+    confianza,
     plan: '[simulado] Trabajo progresivo de 4 semanas centrado en equilibrar la carga muscular entre ambos lados.',
     alertas: nAtrofias > 0 ? ['La diferencia detectada conviene revisarla con un profesional.'] : [],
     origen: 'mock',

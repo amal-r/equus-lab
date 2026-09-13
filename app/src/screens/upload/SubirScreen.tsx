@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, Text, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -49,18 +49,26 @@ export default function SubirScreen({ navigation }: Props) {
     return [...base, t('pieATierra')];
   }, [disciplinaSel, t]);
 
-  const pickVideo = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const pickVideo = async (fromCamera: boolean) => {
+    const perm = fromCamera
+      ? await ImagePicker.requestCameraPermissionsAsync()
+      : await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Permiso necesario', 'Necesito acceso a tu galería para elegir el vídeo.');
+      Alert.alert(
+        'Permiso necesario',
+        fromCamera ? 'Necesito acceso a la cámara para grabar la sesión.' : 'Necesito acceso a tu galería para elegir el vídeo.',
+        [
+          { text: 'Ahora no', style: 'cancel' },
+          { text: 'Ir a Ajustes', onPress: () => Linking.openSettings() },
+        ]
+      );
       return;
     }
     setBusyPicking(true);
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['videos'],
-        quality: 0.7,
-      });
+      const result = fromCamera
+        ? await ImagePicker.launchCameraAsync({ mediaTypes: ['videos'], videoMaxDuration: clipMaxMin * 60, quality: 0.7 })
+        : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['videos'], quality: 0.7 });
       if (!result.canceled && result.assets?.[0]) {
         const asset = result.assets[0];
         const durationSec = Math.max(1, Math.round((asset.duration ?? 0) / 1000) || 60);
@@ -104,31 +112,49 @@ export default function SubirScreen({ navigation }: Props) {
       <ScreenContainer>
         <BackHeader title={t('nuevaSesion')} onBack={() => navigation.goBack()} />
 
-        <Pressable
-          onPress={pickVideo}
+        <View
           style={{
             backgroundColor: colors.ph,
             borderWidth: 1.5,
             borderStyle: 'dashed',
             borderColor: '#c9a488',
             borderRadius: 22,
-            height: 196,
+            paddingVertical: 24,
             alignItems: 'center',
             justifyContent: 'center',
             gap: 10,
-            marginBottom: 20,
+            marginBottom: 14,
           }}
         >
           <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ color: '#fff', fontSize: 25 }}>↑</Text>
           </View>
           <Text style={{ fontWeight: '700', fontSize: 14, color: colors.ink }}>
-            {busyPicking ? 'Abriendo galería…' : videoUri ? `${videoName ?? 'vídeo'} ✓` : t('subeTuVideo')}
+            {busyPicking ? 'Abriendo…' : videoUri ? `${videoName ?? 'vídeo'} ✓` : t('subeTuVideo')}
           </Text>
           <Text style={{ fontSize: 11.5, color: colors.m50, textAlign: 'center', lineHeight: 15, paddingHorizontal: 20 }}>
             {t('subirHint')}
           </Text>
-        </Pressable>
+        </View>
+
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+          <Pressable
+            onPress={() => pickVideo(true)}
+            disabled={busyPicking}
+            style={{ flex: 1, flexDirection: 'row', gap: 7, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.accent, borderRadius: 14, paddingVertical: 13 }}
+          >
+            <Text style={{ fontSize: 15 }}>🎥</Text>
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13 }}>Grabar</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => pickVideo(false)}
+            disabled={busyPicking}
+            style={{ flex: 1, flexDirection: 'row', gap: 7, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 14, paddingVertical: 13 }}
+          >
+            <Text style={{ fontSize: 15 }}>🖼️</Text>
+            <Text style={{ color: colors.ink, fontWeight: '700', fontSize: 13 }}>Galería</Text>
+          </Pressable>
+        </View>
 
         <Text style={{ fontWeight: '800', fontSize: 13, color: colors.ink, marginBottom: 9 }}>{t('caballo')}</Text>
         <View style={{ flexDirection: 'row', gap: 9, flexWrap: 'wrap', marginBottom: 18 }}>

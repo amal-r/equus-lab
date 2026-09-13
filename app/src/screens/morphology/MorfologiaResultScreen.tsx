@@ -110,8 +110,13 @@ export default function MorfologiaResultScreen({ navigation, route }: Props) {
           ))}
         </View>
 
-        <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink, marginBottom: 11 }}>Medidas y proporciones</Text>
-        <View style={{ gap: 8, marginBottom: 20 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 11 }}>
+          <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink }}>Medidas y proporciones</Text>
+          <View style={{ backgroundColor: colors.tint, borderRadius: 8, paddingVertical: 3, paddingHorizontal: 8 }}>
+            <Text style={{ color: colors.good, fontWeight: '700', fontSize: 9.5 }}>ESTIMADO</Text>
+          </View>
+        </View>
+        <View style={{ gap: 8, marginBottom: 10 }}>
           {scan.medidas.map((m) => (
             <View key={m.label} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 14, padding: 12, gap: 10 }}>
               <View style={{ flex: 1 }}>
@@ -124,6 +129,11 @@ export default function MorfologiaResultScreen({ navigation, route }: Props) {
             </View>
           ))}
         </View>
+        <Text style={{ fontSize: 10.5, color: colors.m50, lineHeight: 15, marginBottom: 20, paddingHorizontal: 2 }}>
+          📐 Medidas estimadas a partir de las fotos, no tomadas con cinta. Sirven para comparar escaneos del mismo
+          caballo y ver su evolución; para cifras exactas, mide en persona. Los ángulos y la simetría sí son fiables
+          porque se calculan sobre proporciones.
+        </Text>
 
         {scan.alertas.length > 0 && (
           <View style={{ backgroundColor: '#f7ece7', borderRadius: radius.xl, padding: 15, marginBottom: 20, flexDirection: 'row', gap: 10 }}>

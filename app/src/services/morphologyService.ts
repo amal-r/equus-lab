@@ -22,6 +22,7 @@ export async function runMorphologyScan(args: RunMorphologyArgs): Promise<MorphS
       if (args.images.posterior)
         form.append('posterior', { uri: args.images.posterior, name: 'posterior.jpg', type: 'image/jpeg' } as unknown as Blob);
       form.append('caballo', args.caballo);
+      form.append('escala', args.escala);
       const result = await apiFetch<MorphScan>('/api/morphology', { method: 'POST', body: form });
       // El backend borra las fotos tras generar el informe (ver server/routes/morphology.js):
       // para poder seguir viéndolas en el resultado, usamos las copias locales del dispositivo.

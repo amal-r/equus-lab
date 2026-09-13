@@ -67,6 +67,10 @@ export interface AnalysisResult {
 
 export type MorphEstado = 'correcto' | 'debil' | 'atrofia';
 export type MorphRef = 'en rango' | 'algo cerrado' | 'asimetria';
+// Con qué se calibró la escala real (cm) del escaneo: una vara de altura
+// conocida en la foto, la alzada ya guardada en la ficha del caballo, o
+// ninguna (en ese caso no se muestran centímetros, solo proporciones/ángulos).
+export type MorphEscala = 'vara' | 'alzada_ficha' | 'ninguna';
 
 export interface MorphZona {
   zona: string;
@@ -97,6 +101,10 @@ export interface MorphScan {
   resumen: string;
   zonas: MorphZona[];
   medidas: MorphMedida[];
+  escala: MorphEscala;
+  // 0-1: confianza en las medidas lineales (no en ángulos/simetría, esos no
+  // dependen de la escala). Si es baja, la UI marca los cm con "±".
+  confianza: number;
   plan: string;
   alertas: string[];
   origen: 'ondevice' | 'gemini';

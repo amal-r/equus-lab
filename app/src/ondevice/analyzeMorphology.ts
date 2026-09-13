@@ -14,12 +14,15 @@
  * existe en el proyecto; la firma pública de `analyzeMorphology()` no cambia,
  * así que la pantalla no necesita tocarse cuando se sustituya.
  */
-import { MorphImages, MorphMedida, MorphScan, MorphZona } from '../types/models';
+import { MorphEscala, MorphImages, MorphMedida, MorphScan, MorphZona } from '../types/models';
 
 export interface AnalyzeMorphologyInput {
   images: MorphImages;
   caballo: string;
   horseId?: string;
+  /** Con qué se calibra la escala real (cm): vara en la foto, alzada ya
+   * guardada en la ficha del caballo, o ninguna (oculta los centímetros). */
+  escala: MorphEscala;
 }
 
 function hashSeed(s: string): number {
@@ -50,13 +53,17 @@ const ZONA_NOTAS: Record<'correcto' | 'debil' | 'atrofia', string[]> = {
   atrofia: ['Bastante menos masa que en la zona simétrica — conviene revisión veterinaria.', 'Diferencia marcada respecto al lado opuesto.'],
 };
 
-const MEDIDA_DEFS: { label: string; unidad: string; base: number; spread: number }[] = [
-  { label: 'Alzada a la cruz', unidad: 'cm', base: 158, spread: 10 },
-  { label: 'Longitud escápula–isquion', unidad: 'cm', base: 132, spread: 8 },
-  { label: 'Ángulo de grupa', unidad: '°', base: 24, spread: 4 },
-  { label: 'Ángulo escápula–húmero', unidad: '°', base: 100, spread: 6 },
-  { label: 'Simetría de grupa', unidad: '%', base: 96, spread: 6 },
-  { label: 'Perímetro torácico', unidad: 'cm', base: 182, spread: 12 },
+// Las de "cm" dependen de tener una escala real (vara o alzada de ficha) --
+// sin eso se ocultan del todo, nunca se inventan centímetros (ver PROMPT-
+// CAMARA-Y-AJUSTES.md). Las de ángulo/porcentaje no dependen de la escala:
+// se calculan sobre proporciones de la propia foto, así que se muestran siempre.
+const MEDIDA_DEFS: { label: string; unidad: string; base: number; spread: number; requiereEscala: boolean }[] = [
+  { label: 'Alzada a la cruz', unidad: 'cm', base: 158, spread: 10, requiereEscala: true },
+  { label: 'Longitud escápula–isquion', unidad: 'cm', base: 132, spread: 8, requiereEscala: true },
+  { label: 'Ángulo de grupa', unidad: '°', base: 24, spread: 4, requiereEscala: false },
+  { label: 'Ángulo escápula–húmero', unidad: '°', base: 100, spread: 6, requiereEscala: false },
+  { label: 'Simetría de grupa', unidad: '%', base: 96, spread: 6, requiereEscala: false },
+  { label: 'Perímetro torácico', unidad: 'cm', base: 182, spread: 12, requiereEscala: true },
 ];
 
 function refFor(label: string, delta: number): MorphMedida['ref'] {
@@ -83,10 +90,16 @@ export async function analyzeMorphology(input: AnalyzeMorphologyInput): Promise<
     return { zona, estado, pct, nota: notas[Math.floor(rand() * notas.length)] };
   });
 
-  const medidas: MorphMedida[] = MEDIDA_DEFS.map((def) => {
+  // Confianza en las medidas lineales: más alta con una vara real en la foto,
+  // media si solo tenemos la alzada guardada en la ficha, más baja sin nada.
+  const confianzaBase = input.escala === 'vara' ? 0.85 : input.escala === 'alzada_ficha' ? 0.7 : 0.45;
+  const confianza = Math.round(Math.max(0.3, Math.min(0.95, confianzaBase + (rand() - 0.5) * 0.1)) * 100) / 100;
+
+  const medidas: MorphMedida[] = MEDIDA_DEFS.filter((def) => !def.requiereEscala || input.escala !== 'ninguna').map((def) => {
     const delta = (rand() - 0.5) * 2 * def.spread;
     const valor = Math.round((def.base + delta) * 10) / 10;
-    return { label: def.label, valor: `${valor} ${def.unidad}`, ref: refFor(def.label, delta) };
+    const prefijo = def.requiereEscala && confianza < 0.6 ? '± ' : '';
+    return { label: def.label, valor: `${prefijo}${valor} ${def.unidad}`, ref: refFor(def.label, delta) };
   });
 
   const nAtrofias = zonas.filter((z) => z.estado === 'atrofia').length;
@@ -116,6 +129,8 @@ export async function analyzeMorphology(input: AnalyzeMorphologyInput): Promise<
     resumen,
     zonas,
     medidas,
+    escala: input.escala,
+    confianza,
     plan: PLAN_POOL[Math.floor(rand() * PLAN_POOL.length)],
     alertas,
     origen: 'ondevice',

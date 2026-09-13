@@ -126,18 +126,31 @@ pct, nota} para exactamente estas 5 zonas: "Dorso / lomo", "Grupa izquierda", "G
 medidas (array de {label, valor, ref} para exactamente estas 6: "Alzada a la cruz", "Longitud
 escápula–isquion", "Ángulo de grupa", "Ángulo escápula–húmero", "Simetría de grupa" y "Perímetro
 torácico" -- valor como string con unidad, p.ej. "158 cm"; ref es "en rango"|"algo cerrado"|"asimetria"),
-plan (string, plan de trabajo de 4 semanas) y alertas (array de strings, vacío si no hay nada
-reseñable).
+confianza (número 0-1: tu confianza en las medidas lineales en cm, no en ángulos/simetría), plan
+(string, plan de trabajo de 4 semanas) y alertas (array de strings, vacío si no hay nada reseñable).
 
-Si no hay ninguna vara u objeto de referencia visible para calibrar la escala real, indica las medidas
-como proporciones relativas razonables en vez de inventar centímetros exactos.
+Sobre la escala (te digo en el mensaje del usuario cuál aplica a estas fotos):
+- "vara": hay una vara u objeto de altura conocida visible en la foto para calibrar. Da centímetros
+  con confianza alta (0.75-0.9).
+- "alzada_ficha": no hay vara, pero conoces la alzada real del caballo (te la doy en el mensaje) --
+  úsala para calibrar el resto de medidas en cm, con confianza media (0.55-0.75).
+- "ninguna": no hay vara ni alzada conocida. NO inventes centímetros exactos: para "Alzada a la cruz",
+  "Longitud escápula–isquion" y "Perímetro torácico" da solo una estimación aproximada, marcada con el
+  prefijo "± " en el valor (p.ej. "± 155 cm"), y confianza baja (0.3-0.5).
+En los tres casos, "Ángulo de grupa", "Ángulo escápula–húmero" y "Simetría de grupa" no dependen de la
+escala (se calculan sobre proporciones de la propia foto): sé firme y preciso con esos tres, con
+lenguaje asertivo, no aproximado.
+
+Usa SIEMPRE lenguaje aproximado ("aproximadamente", "en torno a") para las medidas en cm cuando la
+escala no sea "vara". Sé firme y directo, en cambio, al describir asimetrías, ángulos y evolución
+respecto a escaneos anteriores si te los menciono.
 
 IMPORTANTE: nunca afirmes patología ni diagnóstico -- nunca uses las palabras "cojera" ni "lesión".
 Usa siempre lenguaje de observación ("menos masa que en el lado derecho", "asimetría detectada"). Si
 detectas una asimetría importante entre lados, añade en alertas una sugerencia de revisión veterinaria
 o de fisioterapeuta equino, sin diagnosticar tú qué es. Responde en español.`;
 
-export async function analyzeMorphology({ perfilUrl, frontalUrl, posteriorUrl, caballo }) {
+export async function analyzeMorphology({ perfilUrl, frontalUrl, posteriorUrl, caballo, escala, alzadaConocida }) {
   const orden = [];
   const files = [];
   if (perfilUrl) {
@@ -153,7 +166,14 @@ export async function analyzeMorphology({ perfilUrl, frontalUrl, posteriorUrl, c
     orden.push('posterior');
   }
   const parts = files.map((f) => createPartFromUri(f.uri, f.mimeType));
-  const prompt = `Caballo: ${caballo}. Fotos adjuntas en este orden: ${orden.join(', ')}. Analiza la morfología.`;
+  const escalaTxt =
+    escala === 'vara'
+      ? 'vara (hay una vara u objeto de altura conocida en la foto)'
+      : escala === 'alzada_ficha'
+      ? `alzada_ficha (alzada conocida del caballo: ${alzadaConocida ?? 'no especificada, estima con lo visible'})`
+      : 'ninguna (sin vara ni alzada conocida)';
+  const prompt = `Caballo: ${caballo}. Fotos adjuntas en este orden: ${orden.join(', ')}. Escala para calibrar
+medidas en cm: ${escalaTxt}. Analiza la morfología.`;
   const response = await ai.models.generateContent({
     model: MODEL,
     contents: createUserContent([...parts, prompt]),

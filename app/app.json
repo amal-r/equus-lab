@@ -45,8 +45,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Equus Lab necesita acceder a tu galería para elegir el vídeo de tu sesión y analizarlo.",
-          "cameraPermission": "Equus Lab necesita acceder a la cámara para hacer las fotos del escaneo morfológico."
+          "photosPermission": "Equus Lab accede a tus fotos y vídeos para analizar las sesiones que elijas.",
+          "cameraPermission": "Equus Lab usa la cámara para grabar tus sesiones y escanear la morfología de tu caballo.",
+          "microphonePermission": "Se graba el audio junto al vídeo de la sesión."
         }
       ]
     ],

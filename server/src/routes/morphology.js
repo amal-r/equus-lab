@@ -19,8 +19,11 @@ const uploadFields = upload.fields([
   { name: 'posterior', maxCount: 1 },
 ]);
 
+const ESCALAS_VALIDAS = ['vara', 'alzada_ficha', 'ninguna'];
+
 morphologyRouter.post('/morphology', uploadFields, async (req, res) => {
   const { caballo } = req.body ?? {};
+  const escala = ESCALAS_VALIDAS.includes(req.body?.escala) ? req.body.escala : 'ninguna';
   const perfilPath = req.files?.perfil?.[0]?.path;
   const frontalPath = req.files?.frontal?.[0]?.path;
   const posteriorPath = req.files?.posterior?.[0]?.path;
@@ -36,7 +39,7 @@ morphologyRouter.post('/morphology', uploadFields, async (req, res) => {
     const used = await scanUsageDb.countThisMonth(req.user.id);
     if (used >= cap) return res.status(429).json({ error: 'cuota_agotada' });
 
-    const feedback = await analyzeMorphology({ perfilUrl: perfilPath, frontalUrl: frontalPath, posteriorUrl: posteriorPath, caballo });
+    const feedback = await analyzeMorphology({ perfilUrl: perfilPath, frontalUrl: frontalPath, posteriorUrl: posteriorPath, caballo, escala });
     await scanUsageDb.increment(req.user.id);
 
     // images no viaja aqui: los temporales se borran al terminar (no hay
@@ -48,6 +51,8 @@ morphologyRouter.post('/morphology', uploadFields, async (req, res) => {
       resumen: feedback.resumen ?? '',
       zonas: feedback.zonas ?? [],
       medidas: feedback.medidas ?? [],
+      escala,
+      confianza: typeof feedback.confianza === 'number' ? feedback.confianza : 0.5,
       plan: feedback.plan ?? '',
       alertas: feedback.alertas ?? [],
       origen: feedback.origen ?? 'gemini',
