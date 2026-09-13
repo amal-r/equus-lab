@@ -19,3 +19,4 @@ export const aiProviderName = providerName;
 export const analyzeVideo = provider.analyzeVideo;
 export const chat = provider.chat;
 export const judgeShow = provider.judgeShow;
+export const analyzeMorphology = provider.analyzeMorphology;

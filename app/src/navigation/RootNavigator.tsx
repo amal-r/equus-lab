@@ -14,6 +14,9 @@ import ProcesandoScreen from '../screens/upload/ProcesandoScreen';
 import ResultadoScreen from '../screens/upload/ResultadoScreen';
 import ComparacionScreen from '../screens/upload/ComparacionScreen';
 
+import MorfologiaScreen from '../screens/morphology/MorfologiaScreen';
+import MorfologiaResultScreen from '../screens/morphology/MorfologiaResultScreen';
+
 import ChatScreen from '../screens/chat/ChatScreen';
 import ProgresoScreen from '../screens/progress/ProgresoScreen';
 
@@ -50,6 +53,8 @@ export function RootNavigator() {
           <Stack.Screen name="Procesando" component={ProcesandoScreen} />
           <Stack.Screen name="Resultado" component={ResultadoScreen} />
           <Stack.Screen name="Comparacion" component={ComparacionScreen} />
+          <Stack.Screen name="Morfologia" component={MorfologiaScreen} />
+          <Stack.Screen name="MorfologiaResultado" component={MorfologiaResultScreen} />
           <Stack.Screen name="Chat" component={ChatScreen} />
           <Stack.Screen name="Progreso" component={ProgresoScreen} />
           <Stack.Screen name="Concursos" component={ConcursosScreen} />

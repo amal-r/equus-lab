@@ -8,7 +8,9 @@ export type RootStackParamList = {
   Procesando: undefined;
   Resultado: { analysisId: string };
   Comparacion: { analysisId: string };
-  Chat: undefined;
+  Morfologia: undefined;
+  MorfologiaResultado: { scanId: string };
+  Chat: { initialQuestion?: string } | undefined;
   Progreso: undefined;
   Concursos: undefined;
   Veredicto: { veredictoId: string };

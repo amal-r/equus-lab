@@ -30,6 +30,10 @@ function toDateStr(d) {
   if (!d) return null;
   return d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10);
 }
+function monthKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
 
 function mapUser(row) {
   return { id: row.id, name: row.name, email: row.email, passwordHash: row.password_hash, createdAt: row.created_at?.toISOString() };
@@ -63,7 +67,7 @@ export const usersDb = {
   },
   async remove(id) {
     // ON DELETE CASCADE en el resto de tablas se lleva subscriptions/horses/
-    // analyses/veredictos/chat_usage de este usuario.
+    // analyses/veredictos/chat_usage/morph_scans/scan_usage de este usuario.
     await pool.query('DELETE FROM users WHERE id = $1', [id]);
   },
 };
@@ -152,6 +156,41 @@ export const veredictosDb = {
   async listByUser(userId) {
     const { rows } = await pool.query('SELECT id, user_id, fecha, data FROM veredictos WHERE user_id = $1 ORDER BY fecha DESC', [userId]);
     return rows.map((r) => ({ id: r.id, userId: r.user_id, fecha: r.fecha.toISOString(), ...r.data }));
+  },
+};
+
+export const morphScansDb = {
+  async create(userId, data) {
+    const id = genId();
+    const { rows } = await pool.query('INSERT INTO morph_scans (id, user_id, data) VALUES ($1,$2,$3) RETURNING fecha', [id, userId, data]);
+    return { id, userId, fecha: rows[0].fecha.toISOString(), ...data };
+  },
+  async listByUser(userId) {
+    const { rows } = await pool.query('SELECT id, user_id, fecha, data FROM morph_scans WHERE user_id = $1 ORDER BY fecha DESC', [userId]);
+    return rows.map((r) => ({ id: r.id, userId: r.user_id, fecha: r.fecha.toISOString(), ...r.data }));
+  },
+};
+
+// Cupo mensual de escaneos morfológicos (se resetea cada mes, a diferencia
+// del chat gratis que es de por vida) -- ver MORPH_LIMITS en plans.js.
+export const scanUsageDb = {
+  async countThisMonth(userId) {
+    const { rows } = await pool.query('SELECT month, count FROM scan_usage WHERE user_id = $1', [userId]);
+    const row = rows[0];
+    if (!row || row.month !== monthKey()) return 0;
+    return row.count;
+  },
+  async increment(userId) {
+    const m = monthKey();
+    const { rows } = await pool.query('SELECT month, count FROM scan_usage WHERE user_id = $1', [userId]);
+    const row = rows[0];
+    const count = row && row.month === m ? row.count + 1 : 1;
+    await pool.query(
+      `INSERT INTO scan_usage (user_id, month, count) VALUES ($1,$2,$3)
+       ON CONFLICT (user_id) DO UPDATE SET month = $2, count = $3`,
+      [userId, m, count]
+    );
+    return count;
   },
 };
 

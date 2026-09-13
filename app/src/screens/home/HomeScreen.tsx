@@ -34,6 +34,8 @@ export default function HomeScreen({ navigation }: Props) {
   const { colors, radius } = useTheme();
   const rider = useAppStore((s) => s.rider);
   const planTier = useAppStore((s) => s.planTier);
+  const horses = useAppStore((s) => s.horses);
+  const selectedHorseId = useAppStore((s) => s.selectedHorseId);
   const analyses = useAppStore((s) => s.analyses);
   const analisisTotal = useAppStore((s) => s.analisisTotal);
   const chatTotal = useAppStore((s) => s.chatTotal);
@@ -193,6 +195,37 @@ export default function HomeScreen({ navigation }: Props) {
             </View>
           </View>
         )}
+
+        <Pressable
+          onPress={() => navigation.navigate('Morfologia')}
+          style={{
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: radius.xl,
+            padding: 15,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 13,
+            marginBottom: 16,
+          }}
+        >
+          <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: colors.tint, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontSize: 20 }}>📐</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
+              <Text style={{ fontWeight: '800', fontSize: 13, color: colors.ink }}>Morfología del caballo</Text>
+              <View style={{ backgroundColor: colors.accent, borderRadius: 8, paddingVertical: 2, paddingHorizontal: 7 }}>
+                <Text style={{ color: '#fff', fontWeight: '800', fontSize: 9 }}>NUEVO</Text>
+              </View>
+            </View>
+            <Text style={{ fontSize: 11, color: colors.m55, marginTop: 3, lineHeight: 15 }}>
+              Escanea a {horses.find((h) => h.id === selectedHorseId)?.nombre ?? 'tu caballo'} y detecta atrofias, asimetrías y
+              desarrollo muscular
+            </Text>
+          </View>
+        </Pressable>
 
         <TintCard style={{ marginBottom: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>

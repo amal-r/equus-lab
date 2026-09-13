@@ -10,6 +10,8 @@ import {
   DISCIPLINAS_BASE,
   Horse,
   Lang,
+  MorphImages,
+  MorphScan,
   NotifPrefs,
   PLAN_DEFS,
   PlanTier,
@@ -17,7 +19,7 @@ import {
   SubEstado,
   Veredicto,
 } from '../types/models';
-import { FREE_LIMITS } from '../types/models';
+import { FREE_LIMITS, MORPH_LIMITS } from '../types/models';
 import { apiFetch } from '../services/apiClient';
 import { HAS_BACKEND } from '../services/config';
 import { clearToken } from '../services/session';
@@ -25,6 +27,11 @@ import { resetUserIdentity } from '../services/purchases';
 
 function genId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+function monthKey(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
 interface AppState {
@@ -70,6 +77,15 @@ interface AppState {
   currentAnalysisId: string | null;
   veredictos: Veredicto[];
 
+  // Flujo "Escaneo morfológico" (efímero, no persiste)
+  scanHorseId: string | null;
+  scanImages: MorphImages;
+  // Cupo mensual (se resetea cada mes, a diferencia del de análisis de vídeo
+  // que es de por vida): scanMonthKey guarda "YYYY-MM" del último uso.
+  scanMonthKey: string;
+  scanMonthCount: number;
+  scans: MorphScan[];
+
   messages: ChatMessage[];
   notif: NotifPrefs;
 
@@ -106,6 +122,14 @@ interface AppState {
   registerFreeAnalysis: () => void;
   canAskChat: () => boolean;
   registerChatQuestion: () => void;
+
+  setScanHorse: (id: string | null) => void;
+  setScanImage: (view: keyof MorphImages, uri: string) => void;
+  clearScanImages: () => void;
+  /** true si el gratis todavía tiene su escaneo de este mes por usar (se resetea cada mes). */
+  canStartFreeScan: () => boolean;
+  registerScan: () => void;
+  addScan: (scan: MorphScan) => void;
 
   addAnalysis: (result: AnalysisResult) => void;
   setCurrentAnalysis: (id: string | null) => void;
@@ -177,6 +201,12 @@ export const useAppStore = create<AppState>()(
       currentAnalysisId: null,
       veredictos: [],
 
+      scanHorseId: null,
+      scanImages: {},
+      scanMonthKey: '',
+      scanMonthCount: 0,
+      scans: [],
+
       messages: [],
       notif: defaultNotif,
 
@@ -218,6 +248,9 @@ export const useAppStore = create<AppState>()(
           usoTotal: 0,
           analisisTotal: 0,
           chatTotal: 0,
+          scans: [],
+          scanMonthKey: '',
+          scanMonthCount: 0,
         });
       },
 
@@ -258,6 +291,22 @@ export const useAppStore = create<AppState>()(
       registerFreeAnalysis: () => set((s) => ({ analisisTotal: s.analisisTotal + 1 })),
       canAskChat: () => get().planTier !== 'free' || get().chatTotal < FREE_LIMITS.preguntasChatGratisTotal,
       registerChatQuestion: () => set((s) => ({ chatTotal: s.chatTotal + 1 })),
+
+      setScanHorse: (id) => set({ scanHorseId: id }),
+      setScanImage: (view, uri) => set((s) => ({ scanImages: { ...s.scanImages, [view]: uri } })),
+      clearScanImages: () => set({ scanImages: {} }),
+      canStartFreeScan: () => {
+        const s = get();
+        if (s.planTier !== 'free') return true;
+        return s.scanMonthKey !== monthKey() || s.scanMonthCount < MORPH_LIMITS.scansPorMesGratis;
+      },
+      registerScan: () =>
+        set((s) => {
+          const key = monthKey();
+          const count = s.scanMonthKey === key ? s.scanMonthCount + 1 : 1;
+          return { scanMonthKey: key, scanMonthCount: count };
+        }),
+      addScan: (scan) => set((s) => ({ scans: [scan, ...s.scans] })),
 
       addAnalysis: (result) =>
         set((s) => ({
@@ -306,6 +355,9 @@ export const useAppStore = create<AppState>()(
         analyses: s.analyses,
         veredictos: s.veredictos,
         notif: s.notif,
+        scanMonthKey: s.scanMonthKey,
+        scanMonthCount: s.scanMonthCount,
+        scans: s.scans,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

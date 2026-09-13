@@ -12,7 +12,7 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       },
-      "buildNumber": "2"
+      "buildNumber": "4"
     },
     "android": {
       "package": "com.equuslab.app",
@@ -45,7 +45,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Equus Lab necesita acceder a tu galería para elegir el vídeo de tu sesión y analizarlo."
+          "photosPermission": "Equus Lab necesita acceder a tu galería para elegir el vídeo de tu sesión y analizarlo.",
+          "cameraPermission": "Equus Lab necesita acceder a la cámara para hacer las fotos del escaneo morfológico."
         }
       ]
     ],

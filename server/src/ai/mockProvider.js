@@ -62,6 +62,35 @@ export async function chat({ question, history, metrics }) {
   return { reply: `${replies[idx]} (respuesta simulada — sin GEMINI_API_KEY configurada)` };
 }
 
+export async function analyzeMorphology({ caballo }) {
+  const rand = rng(hashSeed(`${caballo}|morfo`));
+  const zonas = ['Dorso / lomo', 'Grupa izquierda', 'Grupa derecha', 'Cuello / trapecio', 'Pectoral / antebrazo'].map((zona) => {
+    const roll = rand();
+    const estado = roll > 0.82 ? 'atrofia' : roll > 0.55 ? 'debil' : 'correcto';
+    const pct = Math.round(estado === 'correcto' ? 78 + rand() * 18 : estado === 'debil' ? 55 + rand() * 20 : 30 + rand() * 20);
+    return { zona, estado, pct, nota: `[simulado] Desarrollo ${estado} en ${zona.toLowerCase()}.` };
+  });
+  const medidas = [
+    { label: 'Alzada a la cruz', unidad: 'cm', base: 158 },
+    { label: 'Longitud escápula–isquion', unidad: 'cm', base: 132 },
+    { label: 'Ángulo de grupa', unidad: '°', base: 24 },
+    { label: 'Ángulo escápula–húmero', unidad: '°', base: 100 },
+    { label: 'Simetría de grupa', unidad: '%', base: 96 },
+    { label: 'Perímetro torácico', unidad: 'cm', base: 182 },
+  ].map((def) => ({ label: def.label, valor: `${Math.round((def.base + (rand() - 0.5) * 10) * 10) / 10} ${def.unidad}`, ref: 'en rango' }));
+  const nAtrofias = zonas.filter((z) => z.estado === 'atrofia').length;
+  const indice = Math.round(Math.max(3, Math.min(9.5, 8.4 - nAtrofias * 1.3 - rand() * 0.4)) * 10) / 10;
+  return {
+    indice,
+    resumen: `Desarrollo general dentro de lo esperado para ${caballo} (respuesta simulada — sin GEMINI_API_KEY configurada).`,
+    zonas,
+    medidas,
+    plan: '[simulado] Trabajo progresivo de 4 semanas centrado en equilibrar la carga muscular entre ambos lados.',
+    alertas: nAtrofias > 0 ? ['La diferencia detectada conviene revisarla con un profesional.'] : [],
+    origen: 'mock',
+  };
+}
+
 export async function judgeShow({ videoUrl, disciplina, prueba }) {
   const rand = rng(hashSeed(`${videoUrl}|${disciplina}|${prueba}`));
   const movs = ['Entrada y saludo', 'Figura central', 'Transición', 'Salida'];

@@ -18,6 +18,7 @@ export default function ProgresoScreen({ navigation }: Props) {
   const { t } = useT();
   const { colors, radius } = useTheme();
   const analyses = useAppStore((s) => s.analyses);
+  const scans = useAppStore((s) => s.scans);
 
   const notaMedia = useMemo(() => {
     if (analyses.length === 0) return 0;
@@ -55,6 +56,12 @@ export default function ProgresoScreen({ navigation }: Props) {
   }, [analyses]);
 
   const maxNota = 10;
+
+  const scanEvolution = useMemo(() => [...scans].reverse().slice(-6), [scans]);
+  const scanDelta = useMemo(() => {
+    if (scans.length < 2) return null;
+    return Math.round((scans[0].indice - scans[1].indice) * 10) / 10;
+  }, [scans]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top']}>
@@ -109,6 +116,39 @@ export default function ProgresoScreen({ navigation }: Props) {
                     <View style={{ width: `${(sk.val / maxNota) * 100}%`, height: '100%', backgroundColor: colors.accent, borderRadius: 4 }} />
                   </View>
                 </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {scans.length > 0 && (
+          <View style={{ backgroundColor: colors.surface, borderRadius: radius.xl, padding: 17, marginBottom: 22 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 14 }}>
+              <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink }}>Evolución morfológica</Text>
+              {scanDelta !== null && (
+                <Text style={{ marginLeft: 'auto', fontWeight: '700', fontSize: 12, color: scanDelta >= 0 ? colors.good : colors.accent }}>
+                  {scanDelta >= 0 ? '+' : ''}
+                  {scanDelta.toString().replace('.', ',')} vs anterior
+                </Text>
+              )}
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 9, height: 90 }}>
+              {scanEvolution.map((sc) => (
+                <Pressable
+                  key={sc.id}
+                  onPress={() => navigation.navigate('MorfologiaResultado', { scanId: sc.id })}
+                  style={{ flex: 1, height: '100%', justifyContent: 'flex-end', alignItems: 'center', gap: 5 }}
+                >
+                  <View
+                    style={{
+                      width: '100%',
+                      borderRadius: 6,
+                      height: `${Math.max(8, (sc.indice / maxNota) * 100)}%`,
+                      backgroundColor: sc === scanEvolution[scanEvolution.length - 1] ? colors.accent : '#e5b39c',
+                    }}
+                  />
+                  <Text style={{ fontSize: 9.5, color: colors.m40 }}>{new Date(sc.fecha).toLocaleDateString(undefined, { month: 'short' })}</Text>
+                </Pressable>
               ))}
             </View>
           </View>

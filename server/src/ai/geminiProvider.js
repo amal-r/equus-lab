@@ -64,6 +64,29 @@ async function uploadVideo(videoUrl) {
   }
 }
 
+async function downloadImageToTemp(imagePath) {
+  const tmpPath = path.join(os.tmpdir(), `equus-img-${crypto.randomBytes(6).toString('hex')}.jpg`);
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    const res = await fetch(imagePath);
+    if (!res.ok) throw new Error(`no se pudo descargar la imagen (${res.status})`);
+    const buf = Buffer.from(await res.arrayBuffer());
+    await fs.promises.writeFile(tmpPath, buf);
+  } else {
+    await fs.promises.copyFile(imagePath.replace(/^file:\/\//, ''), tmpPath);
+  }
+  return tmpPath;
+}
+
+async function uploadImage(imagePath) {
+  const tmpPath = await downloadImageToTemp(imagePath);
+  try {
+    const file = await ai.files.upload({ file: tmpPath, config: { mimeType: 'image/jpeg' } });
+    return file;
+  } finally {
+    fs.promises.unlink(tmpPath).catch(() => {});
+  }
+}
+
 export async function analyzeVideo({ videoUrl, disciplina, foco, esPieATierra, caballo }) {
   const file = await uploadVideo(videoUrl);
   const prompt =
@@ -90,6 +113,53 @@ export async function chat({ question, history, metrics }) {
     config: { systemInstruction: SYSTEM_CHAT },
   });
   return { reply: response.text };
+}
+
+// Zonas y medidas fijas para que el JSON encaje siempre con lo que espera la
+// app (MorfologiaResultScreen), igual que el contrato de nota/subscores en
+// SYSTEM_COACH.
+const SYSTEM_MORPHOLOGY = `Eres un juez de morfología equina y fisioterapeuta equino experto. Analizas
+hasta 3 fotos (perfil izquierdo, frontal, posterior) de un caballo parado y devuelves SIEMPRE un JSON
+con las claves: indice (0-10, número), resumen (string, una frase), zonas (array de {zona, estado,
+pct, nota} para exactamente estas 5 zonas: "Dorso / lomo", "Grupa izquierda", "Grupa derecha", "Cuello
+/ trapecio" y "Pectoral / antebrazo" -- estado es "correcto"|"debil"|"atrofia", pct un número 0-100),
+medidas (array de {label, valor, ref} para exactamente estas 6: "Alzada a la cruz", "Longitud
+escápula–isquion", "Ángulo de grupa", "Ángulo escápula–húmero", "Simetría de grupa" y "Perímetro
+torácico" -- valor como string con unidad, p.ej. "158 cm"; ref es "en rango"|"algo cerrado"|"asimetria"),
+plan (string, plan de trabajo de 4 semanas) y alertas (array de strings, vacío si no hay nada
+reseñable).
+
+Si no hay ninguna vara u objeto de referencia visible para calibrar la escala real, indica las medidas
+como proporciones relativas razonables en vez de inventar centímetros exactos.
+
+IMPORTANTE: nunca afirmes patología ni diagnóstico -- nunca uses las palabras "cojera" ni "lesión".
+Usa siempre lenguaje de observación ("menos masa que en el lado derecho", "asimetría detectada"). Si
+detectas una asimetría importante entre lados, añade en alertas una sugerencia de revisión veterinaria
+o de fisioterapeuta equino, sin diagnosticar tú qué es. Responde en español.`;
+
+export async function analyzeMorphology({ perfilUrl, frontalUrl, posteriorUrl, caballo }) {
+  const orden = [];
+  const files = [];
+  if (perfilUrl) {
+    files.push(await uploadImage(perfilUrl));
+    orden.push('perfil izquierdo');
+  }
+  if (frontalUrl) {
+    files.push(await uploadImage(frontalUrl));
+    orden.push('frontal');
+  }
+  if (posteriorUrl) {
+    files.push(await uploadImage(posteriorUrl));
+    orden.push('posterior');
+  }
+  const parts = files.map((f) => createPartFromUri(f.uri, f.mimeType));
+  const prompt = `Caballo: ${caballo}. Fotos adjuntas en este orden: ${orden.join(', ')}. Analiza la morfología.`;
+  const response = await ai.models.generateContent({
+    model: MODEL,
+    contents: createUserContent([...parts, prompt]),
+    config: { systemInstruction: SYSTEM_MORPHOLOGY, responseMimeType: 'application/json' },
+  });
+  return { ...JSON.parse(response.text), origen: 'gemini' };
 }
 
 export async function judgeShow({ videoUrl, disciplina, prueba }) {

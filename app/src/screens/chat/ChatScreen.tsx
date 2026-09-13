@@ -13,7 +13,7 @@ import type { RootStackParamList } from '../../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Chat'>;
 
-export default function ChatScreen({ navigation }: Props) {
+export default function ChatScreen({ navigation, route }: Props) {
   const { t, lang } = useT();
   const { colors } = useTheme();
   const messages = useAppStore((s) => s.messages);
@@ -83,6 +83,16 @@ export default function ChatScreen({ navigation }: Props) {
       setSending(false);
     }
   };
+
+  const initialQuestionRef = useRef(false);
+  useEffect(() => {
+    const initialQuestion = route.params?.initialQuestion;
+    if (initialQuestion && !initialQuestionRef.current) {
+      initialQuestionRef.current = true;
+      send(initialQuestion);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.initialQuestion]);
 
   const suggestions = ['¿Cómo bajo los talones?', '¿Qué ejercicios hago para reunir?', '¿Cómo corrijo la rectitud en la diagonal?'];
 

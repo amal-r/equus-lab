@@ -65,6 +65,43 @@ export interface AnalysisResult {
   origen: 'ondevice' | 'gemini';
 }
 
+export type MorphEstado = 'correcto' | 'debil' | 'atrofia';
+export type MorphRef = 'en rango' | 'algo cerrado' | 'asimetria';
+
+export interface MorphZona {
+  zona: string;
+  estado: MorphEstado;
+  pct: number;
+  nota: string;
+}
+
+export interface MorphMedida {
+  label: string;
+  valor: string;
+  ref: MorphRef;
+}
+
+export interface MorphImages {
+  perfil?: string;
+  frontal?: string;
+  posterior?: string;
+}
+
+export interface MorphScan {
+  id: string;
+  fecha: string; // ISO
+  horseId?: string;
+  caballo: string;
+  images: MorphImages;
+  indice: number;
+  resumen: string;
+  zonas: MorphZona[];
+  medidas: MorphMedida[];
+  plan: string;
+  alertas: string[];
+  origen: 'ondevice' | 'gemini';
+}
+
 export interface Veredicto {
   id: string;
   fecha: string;
@@ -106,6 +143,13 @@ export const FREE_LIMITS = {
   clipMaxMin: 3,
   analisisGratisTotal: 1,
   preguntasChatGratisTotal: 3,
+};
+
+// El escaneo morfológico sí se resetea cada mes (no es "de por vida" como el
+// análisis de vídeo gratis): 1 al mes en gratis, más al mes en Premium.
+export const MORPH_LIMITS = {
+  scansPorMesGratis: 1,
+  scansPorMesPremium: 10,
 };
 
 export type RootScreen =

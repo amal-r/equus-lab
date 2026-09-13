@@ -17,3 +17,10 @@ export const FREE_LIMITS = {
 };
 
 export const EXTRA_PACK_MIN = 100;
+
+// Escaneo morfológico: se resetea cada mes (no es "de por vida" como
+// analisisGratisTotal). Ver models.ts MORPH_LIMITS en la app, debe ir sincronizado.
+export const MORPH_LIMITS = {
+  scansPorMesGratis: 1,
+  scansPorMesPremium: 10,
+};
