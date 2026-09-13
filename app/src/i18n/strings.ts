@@ -92,7 +92,7 @@ export const strings = {
     semanas: 'semanas',
     evolucionNota: 'Evolución de la nota',
     porDestreza: 'Por destreza',
-    sesionesRecientes: 'Sesiones recientes',
+    sesionesRecientes: 'Todas las sesiones',
 
     // Concursos
     concursos: 'Concursos',
@@ -270,7 +270,7 @@ export const strings = {
     semanas: 'weeks',
     evolucionNota: 'Score trend',
     porDestreza: 'By skill',
-    sesionesRecientes: 'Recent sessions',
+    sesionesRecientes: 'All sessions',
 
     concursos: 'Shows',
     concursosDesc: 'Record yourself doing a full test and the AI judges it like a real judge: score per movement, coefficients and final verdict.',

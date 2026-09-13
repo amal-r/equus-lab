@@ -154,12 +154,36 @@ export default function ProgresoScreen({ navigation }: Props) {
           </View>
         )}
 
+        {scans.length > 0 && (
+          <View style={{ marginBottom: 22 }}>
+            <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink, marginBottom: 11 }}>Todos los escaneos</Text>
+            <View style={{ gap: 10 }}>
+              {[...scans].reverse().map((sc) => (
+                <Pressable
+                  key={sc.id}
+                  onPress={() => navigation.navigate('MorfologiaResultado', { scanId: sc.id })}
+                  style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 13, flexDirection: 'row', alignItems: 'center', gap: 13 }}
+                >
+                  <View style={{ width: 46, height: 46, borderRadius: 12, backgroundColor: colors.ph, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 18 }}>📐</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontWeight: '700', fontSize: 13, color: colors.ink }}>{sc.caballo}</Text>
+                    <Text style={{ fontSize: 11, color: colors.m50 }}>{new Date(sc.fecha).toLocaleDateString()}</Text>
+                  </View>
+                  <Text style={{ fontWeight: '800', fontSize: 17, color: colors.accent }}>{sc.indice.toFixed(1).replace('.', ',')}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
+
         <Text style={{ fontWeight: '800', fontSize: 13.5, color: colors.ink, marginBottom: 11 }}>{t('sesionesRecientes')}</Text>
         <View style={{ gap: 10 }}>
           {analyses.length === 0 ? (
             <Text style={{ fontSize: 12.5, color: colors.m55 }}>Todavía no hay sesiones. ¡Sube tu primer vídeo!</Text>
           ) : (
-            analyses.slice(0, 10).map((a) => (
+            analyses.map((a) => (
               <Pressable
                 key={a.id}
                 onPress={() => navigation.navigate('Resultado', { analysisId: a.id })}

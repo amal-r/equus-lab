@@ -27,6 +27,7 @@ export default function PerfilScreen({ navigation }: Props) {
   const horses = useAppStore((s) => s.horses);
   const analyses = useAppStore((s) => s.analyses);
   const veredictos = useAppStore((s) => s.veredictos);
+  const scans = useAppStore((s) => s.scans);
   const deleteHorse = useAppStore((s) => s.deleteHorse);
 
   const racha = useMemo(() => computeWeekStreak(analyses.map((a) => a.fecha)), [analyses]);
@@ -86,18 +87,19 @@ export default function PerfilScreen({ navigation }: Props) {
           </View>
         </View>
 
-        <View style={{ flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.xl, padding: 16, marginBottom: 22 }}>
+        <View style={{ flexDirection: 'row', backgroundColor: colors.surface, borderRadius: radius.xl, padding: 14, marginBottom: 22 }}>
           {[
-            { v: analyses.length, l: t('sesiones') },
-            { v: notaMedia ? notaMedia.toFixed(1).replace('.', ',') : '—', l: t('notaMedia'), accent: true },
-            { v: veredictos.length, l: 'concursos' },
-            { v: `${horasAnalizadas}h`, l: 'analizadas' },
+            { v: analyses.length, l: t('sesiones'), onPress: () => navigation.navigate('Progreso') },
+            { v: notaMedia ? notaMedia.toFixed(1).replace('.', ',') : '—', l: t('notaMedia'), accent: true, onPress: () => navigation.navigate('Progreso') },
+            { v: veredictos.length, l: 'concursos', onPress: () => navigation.navigate('Concursos') },
+            { v: scans.length, l: 'escaneos', onPress: () => navigation.navigate('Progreso') },
+            { v: `${horasAnalizadas}h`, l: 'analizadas', onPress: () => navigation.navigate('Progreso') },
           ].map((s, i, arr) => (
             <React.Fragment key={s.l}>
-              <View style={{ flex: 1, alignItems: 'center' }}>
-                <Text style={{ fontWeight: '800', fontSize: 19, color: s.accent ? colors.accent : colors.ink }}>{s.v}</Text>
-                <Text style={{ fontSize: 10, color: colors.m50, marginTop: 3 }}>{s.l}</Text>
-              </View>
+              <Pressable onPress={s.onPress} style={{ flex: 1, alignItems: 'center' }}>
+                <Text style={{ fontWeight: '800', fontSize: 17, color: s.accent ? colors.accent : colors.ink }}>{s.v}</Text>
+                <Text style={{ fontSize: 9.5, color: colors.m50, marginTop: 3, textAlign: 'center' }}>{s.l}</Text>
+              </Pressable>
               {i < arr.length - 1 && <View style={{ width: 1, backgroundColor: colors.border }} />}
             </React.Fragment>
           ))}
