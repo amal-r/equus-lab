@@ -21,17 +21,34 @@ function uniqueName(ext: string): string {
 // el arranque entero. Todo el trabajo con el filesystem va dentro de la
 // función, que solo se llama cuando el usuario elige de verdad una foto/vídeo.
 export async function persistPickedFile(sourceUri: string, ext: string): Promise<string> {
+  let dest: File | undefined;
   try {
     const mediaDir = new Directory(Paths.document, 'media');
-    if (!mediaDir.exists) mediaDir.create();
+    if (!mediaDir.exists) {
+      try {
+        mediaDir.create();
+      } catch {
+        // Dos fotos del escaneo pueden elegirse casi a la vez (MorfologiaScreen
+        // no bloquea los otros dos huecos mientras uno está copiando) y ambas
+        // llamadas pueden ver `exists === false` antes de que la otra termine
+        // de crear la carpeta -- si ya existe para entonces, no pasa nada.
+      }
+    }
     const source = new File(sourceUri);
-    const dest = new File(mediaDir, uniqueName(ext));
+    dest = new File(mediaDir, uniqueName(ext));
     await source.copy(dest);
     return dest.uri;
-  } catch {
-    // Si copiar a almacenamiento persistente falla, mejor seguir con la URI
-    // original del picker (aunque se pueda perder tras una actualización)
-    // que dejar roto todo el flujo de subir vídeo / escanear.
+  } catch (err) {
+    console.warn('[persistMedia] no se pudo copiar a almacenamiento persistente, se usa la URI original del picker', err);
+    if (dest?.exists) {
+      try {
+        dest.delete();
+      } catch {
+        // limpieza best-effort de una copia a medias; si tampoco se puede borrar, se queda huérfana.
+      }
+    }
+    // Mejor seguir con la URI original del picker (se puede perder tras una
+    // actualización) que dejar roto todo el flujo de subir vídeo / escanear.
     return sourceUri;
   }
 }
