@@ -10,7 +10,6 @@ import { TintCard } from '../../components/TintCard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { useTheme } from '../../theme/useTheme';
 import { useAppStore } from '../../store/useAppStore';
-import { persistPickedFile } from '../../utils/persistMedia';
 import { runMorphologyScan } from '../../services/morphologyService';
 import { ensurePremiumIdentity } from '../../services/backendAccount';
 import type { RootStackParamList } from '../../navigation/types';
@@ -73,11 +72,7 @@ export default function MorfologiaScreen({ navigation }: Props) {
         ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.8 })
         : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 });
       if (!result.canceled && result.assets?.[0]) {
-        // Copia a almacenamiento persistente: la URI del picker vive en la caché de la
-        // app y se pierde al actualizar la app (ver persistMedia.ts), no solo al
-        // reinstalarla -- si no, la foto dejaría de verse en el resultado del escaneo.
-        const persistedUri = await persistPickedFile(result.assets[0].uri, 'jpg');
-        setScanImage(key, persistedUri);
+        setScanImage(key, result.assets[0].uri);
       }
     } finally {
       setBusyKey(null);
