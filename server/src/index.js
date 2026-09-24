@@ -23,7 +23,11 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
-app.use(express.json({ limit: '1mb' }));
+// Se guarda el cuerpo crudo (antes de parsear) en req.rawBody para poder
+// verificar la firma HMAC del webhook de RevenueCat en webhooks.js -- esa
+// firma se calcula sobre los bytes exactos recibidos, no sobre el objeto ya
+// parseado (re-serializarlo puede dar un JSON distinto byte a byte).
+app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use('/api', apiRateLimit);
 
 app.get('/health', (req, res) => res.json({ ok: true, aiProvider: aiProviderName }));
